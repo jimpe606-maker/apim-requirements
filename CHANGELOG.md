@@ -16,6 +16,10 @@ All notable changes to this baseline are documented here. The format follows
   OPS area weight can be earned.
 - IMPL-COM-001: a yearly exit drill that proves a complete, valid export (SOL-COM-001).
 
+### Changed
+
+- Dependabot only updates GitHub Actions; Python dependencies stay as minimum versions.
+
 ### Fixed
 
 - The lint reports invalid YAML as an L01 error instead of crashing.
