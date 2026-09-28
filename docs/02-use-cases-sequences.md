@@ -77,7 +77,7 @@ sequenceDiagram
   PDev->>Git: Review, approve, merge (signed commit)
   Git->>CI: Release pipeline (tag)
   CI->>CP: Apply desired state (API, routes, policies, plans) for env=test
-  CP->>GW: Distribute config; gateway hot-reloads
+  CP->>GW: Distribute config, gateway hot-reloads
   CI->>CI: Smoke test via gateway
   CI->>CP: Promote to prod (same artefact, env overlay)
   CP->>Portal: Publish catalogue entry generated from contract
@@ -124,7 +124,7 @@ sequenceDiagram
   Git->>CI: Validate manifest (scopes exist, plan allowed for org, key type/size, redirect URI policy)
   Owner->>Git: Approve subscription (or auto-approve for sandbox per policy)
   Git->>CI: Merge → apply
-  CI->>Reg: Dynamic Client Registration (RFC 7591) with software statement; store public JWKS
+  CI->>Reg: Dynamic Client Registration (RFC 7591) with software statement and stores the public JWKS
   Reg->>AS: Client metadata available (client_id, auth method, allowed grants, scopes)
   alt mTLS client
     Dev->>PKI: CSR → client certificate (or bring-your-own from trusted CA)
@@ -165,7 +165,7 @@ sequenceDiagram
   participant IdP as C6 Identity Provider
   participant KMS as C12 KMS/HSM
 
-  App->>App: Generate PKCE code_verifier / S256 challenge; generate DPoP key pair (if DPoP)
+  App->>App: Generate PKCE code_verifier / S256 challenge and a DPoP key pair (if DPoP)
   App->>AS: POST /par (client auth: private_key_jwt or mTLS) with redirect_uri, scope, code_challenge, state, dpop_jkt
   AS->>AS: Authenticate client (verify JWT signature against registered JWKS / cert thumbprint)
   AS-->>App: request_uri (single use, short TTL)
@@ -210,18 +210,18 @@ sequenceDiagram
   participant BE as C15 Backend API
   participant Aud as C14 Observability & audit
 
-  App->>TP: GET /accounts/123  Authorization: DPoP <token>  DPoP: <proof>  (or mTLS)
+  App->>TP: GET /accounts/123  DPoP-bound access token and DPoP proof header (or mTLS)
   TP->>TP: TLS 1.3, WAF, size/rate limits, schema pre-check
   TP->>GW: Forward
   GW->>AS: Fetch/cached JWKS (or introspect opaque token)
-  GW->>GW: Validate signature, iss, aud, exp, nbf, scope; check revocation cache
+  GW->>GW: Validate signature, iss, aud, exp, nbf and scope, then check revocation cache
   GW->>GW: Verify sender constraint: DPoP proof (htm, htu, ath, jti, iat) matches cnf.jkt / mTLS cert matches cnf.x5t#S256
   GW->>PDP: Authorize(subject, client, scopes, resource, action, context)
   PDP->>PIP: Fetch consent, entitlements, data classification
   PDP-->>GW: Permit / Deny (+ obligations: field masking, row filter)
   GW->>GW: Enforce request policy (rate limit per client, schema validation, header allow-list)
   GW->>BE: mTLS call with identity context (JWT propagation or signed headers), correlation-id
-  BE->>BE: Verify gateway identity; apply obligations
+  BE->>BE: Verify gateway identity, apply obligations
   BE-->>GW: Response
   GW->>GW: Response policy (schema check, masking, no sensitive headers)
   GW-->>App: 200 + response
@@ -261,7 +261,7 @@ sequenceDiagram
   Sec->>Git: Approvals (security + affected API owners via CODEOWNERS)
   Git->>CI: Merge → deploy to test, run conformance suite
   CI->>CP: Publish policy bundle (signed) to prod
-  CP->>PDP: Bundle pulled; signature verified; atomic switch
+  CP->>PDP: Bundle pulled, signature verified, atomic switch
   CI->>Aud: Record policy version, impact report, approvers
 ```
 
@@ -296,7 +296,7 @@ sequenceDiagram
   note over Own,Aud: B. Scheduled key / certificate rotation
   CI->>PKI: Renew certs before expiry (automated)
   AS->>AS: Add new signing key to JWKS, sign with new, retire old after overlap
-  Reg->>Reg: Consumer publishes new JWKS key id; old key valid during overlap
+  Reg->>Reg: Consumer publishes new JWKS key id, old key valid during overlap
   end
   rect rgb(245,245,245)
   note over Own,Aud: C. Deprecate / retire API
