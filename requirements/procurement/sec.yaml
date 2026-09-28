@@ -1,0 +1,250 @@
+set: PROC
+area: SEC
+requirements:
+  - id: PROC-SEC-001
+    title: FAPI 2.0 conformance certification
+    layer: technology
+    type: assurance
+    level: system
+    priority: must
+    statement: The offered authorization server shall hold a current OpenID Foundation FAPI 2.0 Security Profile certification for at least one client authentication method (private_key_jwt or mTLS) and at least one sender-constraint method (DPoP or mTLS).
+    rationale: Third-party conformance is stronger evidence than self-declaration and directly verifies SOL-SEC-002.
+    source: SOL-SEC-002
+    acceptance_criteria:
+      - Certification entry is visible in the OpenID Foundation certified list for the offered product version.
+      - Certified options cover the combination the buyer selects for sensitive APIs.
+    verification: evidence
+    allocated_to: [C5]
+    traces:
+      satisfies: [SOL-SEC-002, SOL-SEC-012]
+      standards: [FAPI 2.0 Security Profile]
+    procurement:
+      kind: mandatory
+      evidence_required:
+        - Link to OpenID Foundation certification entry
+        - Conformance suite results for the offered version
+    status: draft
+    owner: procurement
+  - id: PROC-SEC-002
+    title: Gateway sender-constraint verification depth
+    layer: technology
+    type: assurance
+    level: system
+    priority: should
+    statement: The offer shall be scored on the gateway's native verification of sender-constrained tokens, evaluated with the buyer's negative test suite (replayed DPoP proof, mismatched mTLS thumbprint, wrong audience, expired token).
+    rationale: Products differ widely in whether proof-of-possession is native, a plugin or custom code; this affects long-term security and cost.
+    source: SOL-GW-001
+    acceptance_criteria:
+      - All negative tests return HTTP 401 with the correct error code.
+      - Verification is a documented, supported product feature rather than custom scripting.
+    verification: test
+    allocated_to: [C1]
+    traces:
+      satisfies: [SOL-GW-001]
+    procurement:
+      kind: evaluated
+      evidence_required:
+        - Test execution log against buyer test suite
+        - Product documentation reference
+      scoring:
+        max_points: 5
+        weight: 0.4
+        scale:
+          - points: 5
+            condition: All negative tests pass using native, documented configuration only.
+          - points: 3
+            condition: All tests pass but one or more checks require a vendor-supplied plugin.
+          - points: 1
+            condition: All tests pass only with buyer-written custom code.
+          - points: 0
+            condition: Any negative test does not return 401.
+    status: draft
+    owner: procurement
+  - id: PROC-SEC-003
+    title: Secure development and vulnerability management of the vendor
+    layer: process
+    type: assurance
+    level: system
+    priority: must
+    statement: The vendor shall provide evidence of an independently audited secure development lifecycle and a published vulnerability disclosure and patch policy with defined response times for critical findings.
+    rationale: Supplier assurance is a qualification concern independent of product features.
+    source: ISO/IEC 27001; NIS2 supply-chain provisions
+    acceptance_criteria:
+      - Valid ISO/IEC 27001 (or SOC 2 Type II) certificate covering the development organisation.
+      - Published policy commits to a fix or mitigation for critical vulnerabilities within 30 days.
+    verification: evidence
+    allocated_to: [ORG]
+    traces:
+      satisfies: [SOL-SEC-002, SOL-SEC-005]
+    procurement:
+      kind: qualification
+      evidence_required:
+        - Certificate copy
+        - Link to vulnerability disclosure policy
+        - SBOM for the offered version
+    status: draft
+    owner: procurement
+  - id: PROC-SEC-004
+    title: Step-up authentication and authentication context in tokens
+    layer: technology
+    type: assurance
+    level: system
+    priority: must
+    statement: The offer shall demonstrate that the authorization server federates end-user authentication to a buyer-supplied OpenID Connect identity provider, triggers step-up when a requested scope requires a higher acr than the current session, and conveys acr and amr in the access token or introspection response.
+    rationale: Step-up for high-risk scopes is a must-have control, and support for scope-driven acr policies differs between authorization servers.
+    source: SOL-SEC-003
+    acceptance_criteria:
+      - Login through the buyer-supplied identity provider completes using standard OpenID Connect configuration only.
+      - A request for a scope mapped to a high-assurance acr with a low-assurance session results in re-authentication at the identity provider.
+      - The issued access token or introspection response contains acr and amr values matching the performed authentication.
+    verification: demonstration
+    allocated_to: [C5, C6]
+    traces:
+      satisfies: [SOL-SEC-003, SOL-SEC-011]
+      use_cases: [UC-04]
+      standards: [OpenID Connect Core, RFC 8176, RFC 9470]
+    procurement:
+      kind: mandatory
+      evidence_required:
+        - Recorded demonstration of the step-up flow
+        - Decoded token or introspection response showing acr and amr
+        - Configuration artefact mapping scopes to required acr values
+    status: draft
+    owner: procurement
+  - id: PROC-SEC-005
+    title: Gateway-to-backend mTLS with workload identity and identity propagation
+    layer: technology
+    type: assurance
+    level: system
+    priority: must
+    statement: The offer shall demonstrate that the gateway calls a buyer test backend over mutual TLS using automatically renewed workload certificates with a lifetime of at most 24 hours and forwards the verified caller identity as a signed assertion.
+    rationale: Zero trust on the east-west path depends on native gateway support for short-lived workload identity, which many gateways support only with static certificates.
+    source: SOL-SEC-006
+    acceptance_criteria:
+      - The test backend rejects a direct call that does not present the gateway's workload certificate.
+      - Certificate renewal occurs automatically during the demonstration without gateway restart or dropped requests.
+      - The forwarded assertion is signed, verifiable by the backend with published keys, and contains subject, client_id, scopes and acr.
+    verification: demonstration
+    allocated_to: [C1, C11, C15]
+    traces:
+      satisfies: [SOL-SEC-006, SOL-SEC-009]
+      use_cases: [UC-05]
+      standards: [RFC 8705, SPIFFE, RFC 7519]
+    procurement:
+      kind: mandatory
+      evidence_required:
+        - Recorded demonstration including the rejected direct call and a certificate renewal
+        - Sample signed assertion and the key set used to verify it
+        - Documentation of supported workload identity sources
+    status: draft
+    owner: procurement
+  - id: PROC-SEC-006
+    title: Pipeline-driven dynamic client registration with asymmetric credentials
+    layer: technology
+    type: assurance
+    level: system
+    priority: must
+    statement: The offer shall pass the buyer's client registration test, in which the pipeline registers and updates a client through RFC 7591 and RFC 7592 with a JWKS URI, and the client authenticates with private_key_jwt without any manual step.
+    rationale: Shared client secrets leak, and registration that needs console steps breaks the configuration-as-code principle for the most common credential change.
+    source: SOL-SEC-004
+    acceptance_criteria:
+      - A client registered by the pipeline authenticates with private_key_jwt on first attempt.
+      - After the consumer publishes a new key identifier in its JWKS, authentication with the new key succeeds with no platform-side change.
+      - Registration of a client with a shared secret is refused by configuration.
+    verification: test
+    allocated_to: [C10, C5, C4]
+    traces:
+      satisfies: [SOL-SEC-004, SOL-SEC-010]
+      use_cases: [UC-03]
+      standards: [RFC 7591, RFC 7592, RFC 7523]
+    procurement:
+      kind: mandatory
+      evidence_required:
+        - Test execution log against the buyer's registration test suite
+        - Pipeline configuration used for registration
+    status: draft
+    owner: procurement
+  - id: PROC-SEC-007
+    title: Revocation effective at the gateway within 60 seconds
+    layer: technology
+    type: assurance
+    level: system
+    priority: must
+    statement: The offer shall pass the buyer's revocation test, in which a still-valid access token is rejected at the gateway within 60 seconds of revoking the token, its client or the client certificate.
+    rationale: Revocation that waits for token expiry leaves a compromised client active for the full token lifetime.
+    source: SOL-SEC-007
+    acceptance_criteria:
+      - For each of token revocation, client revocation and certificate revocation, the gateway returns HTTP 401 for the affected token within 60 seconds.
+      - Each revocation produces an audit event.
+    verification: test
+    allocated_to: [C5, C1, C10, C14]
+    traces:
+      satisfies: [SOL-SEC-007]
+      use_cases: [UC-07]
+      standards: [RFC 7009]
+    procurement:
+      kind: mandatory
+      evidence_required:
+        - Test execution log with timestamps for each revocation type
+        - Documentation of the revocation propagation mechanism
+    status: draft
+    owner: procurement
+  - id: PROC-SEC-008
+    title: Time-boxed, multi-factor, audited break-glass access
+    layer: technology
+    type: assurance
+    level: system
+    priority: must
+    statement: The offer shall demonstrate a break-glass access mode that requires multi-factor authentication, expires automatically within a configurable period of at most 4 hours and writes every action to the audit log with operator identity and justification.
+    rationale: Configuration as code must not prevent an emergency response, but the emergency path must be as controlled and auditable as the normal one.
+    source: SOL-SEC-007
+    acceptance_criteria:
+      - Break-glass activation without a second factor is refused.
+      - Break-glass access ends automatically at the configured expiry.
+      - Every action taken during the demonstration appears in the audit log with operator identity and justification.
+    verification: demonstration
+    allocated_to: [C2, C5, C14]
+    traces:
+      satisfies: [SOL-SEC-008]
+      use_cases: [UC-07]
+    procurement:
+      kind: mandatory
+      evidence_required:
+        - Recorded demonstration of activation, expiry and audit trail
+        - Break-glass configuration documentation
+    status: draft
+    owner: procurement
+  - id: PROC-SEC-009
+    title: Breadth of FAPI 2.0 certified options
+    layer: technology
+    type: assurance
+    level: system
+    priority: should
+    statement: The offer shall be scored on the breadth of the OpenID Foundation FAPI 2.0 certifications held by the offered authorization server.
+    rationale: More certified client-authentication and sender-constraint options give the buyer more interoperable choices for different consumers.
+    source: SOL-SEC-002
+    acceptance_criteria:
+      - Each claimed option is visible in the OpenID Foundation certified list for the offered product version.
+    verification: evidence
+    allocated_to: [C5]
+    traces:
+      satisfies: [SOL-SEC-002]
+      related: [PROC-SEC-001]
+      standards: [FAPI 2.0 Security Profile]
+    procurement:
+      kind: evaluated
+      evidence_required:
+        - Link to OpenID Foundation certification entry
+        - Conformance suite results for the offered version
+      scoring:
+        max_points: 5
+        weight: 0.6
+        scale:
+          - points: 5
+            condition: Certified for both client authentication methods and both sender-constraint methods, plus FAPI 2.0 Message Signing.
+          - points: 3
+            condition: Certified for one client authentication method and both sender-constraint methods.
+          - points: 0
+            condition: Certified only for the minimum combination required by PROC-SEC-001.
+    status: draft
+    owner: procurement

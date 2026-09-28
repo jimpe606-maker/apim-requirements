@@ -1,0 +1,57 @@
+set: SOL
+area: OPS
+requirements:
+  - id: SOL-OPS-001
+    title: Zero-downtime configuration and version updates
+    layer: technology
+    type: quality
+    level: system
+    priority: must
+    statement: The solution shall apply configuration changes and gateway software updates without dropping in-flight requests.
+    rationale: Frequent, small CI/CD deployments are only viable if each is non-disruptive.
+    source: Stakeholder need — continuous deployment
+    acceptance_criteria:
+      - Under a sustained test load, a configuration change and a rolling gateway upgrade produce zero non-2xx responses attributable to the change.
+    verification: test
+    allocated_to: [C1, C2]
+    traces:
+      parents: [SOL-GOAL-005]
+      use_cases: [UC-02]
+    status: draft
+    owner: platform-operations
+  - id: SOL-OPS-002
+    title: Automated certificate and key lifecycle
+    layer: technology
+    type: system
+    level: system
+    priority: must
+    statement: The solution shall renew, rotate and revoke TLS certificates, workload identities and signing keys automatically before expiry.
+    rationale: Manual certificate handling is the most common cause of avoidable outages and a click-ops entry point.
+    source: docs/02 UC-07
+    acceptance_criteria:
+      - No certificate in any environment reaches less than 20 % of its lifetime without renewal.
+    verification: test
+    allocated_to: [C11, C12, C5]
+    traces:
+      parents: [SOL-GOAL-005]
+      use_cases: [UC-07]
+    status: draft
+    owner: platform-operations
+  - id: SOL-OPS-003
+    title: Alerting on failed certificate and key automation
+    layer: technology
+    type: system
+    level: system
+    priority: must
+    statement: If automated renewal, rotation or revocation of a certificate, workload identity or signing key fails, then the solution shall raise an alert within 15 minutes.
+    rationale: Silent automation failures cause the same outages as manual handling, only later.
+    source: docs/02 UC-07
+    acceptance_criteria:
+      - A deliberately failed renewal raises an alert within 15 minutes.
+    verification: test
+    allocated_to: [C11, C12, C14]
+    traces:
+      parents: [SOL-OPS-002]
+      use_cases: [UC-07]
+    status: draft
+    owner: platform-operations

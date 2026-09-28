@@ -1,0 +1,41 @@
+set: IMPL
+area: OBS
+requirements:
+  - id: IMPL-OBS-001
+    title: Platform telemetry through a buyer-operated collector
+    layer: process
+    type: process
+    level: system
+    priority: should
+    statement: The platform team shall route all platform telemetry through a buyer-operated OpenTelemetry collector.
+    rationale: A collector the buyer operates keeps telemetry in open formats and independent of any single vendor's monitoring stack.
+    source: SOL-OBS-002
+    acceptance_criteria:
+      - Gateway, control plane and authorization server export telemetry only to the buyer-operated collector.
+    verification: test
+    allocated_to: [C14, C1, C2, C5]
+    traces:
+      satisfies: [SOL-OBS-002]
+      use_cases: [UC-05]
+      standards: [OpenTelemetry, W3C Trace Context]
+    status: draft
+    owner: platform-operations
+  - id: IMPL-OBS-002
+    title: Trace propagation verified at backend onboarding
+    layer: process
+    type: process
+    level: system
+    priority: should
+    statement: The onboarding pipeline shall enable production routing to a new backend only after verifying that the backend continues the W3C Trace Context received from the gateway.
+    rationale: End-to-end tracing breaks at the first backend that drops the trace context, so propagation is checked once at onboarding instead of discovered during an incident.
+    source: SOL-OBS-002
+    acceptance_criteria:
+      - The onboarding pipeline sends a traced request and fails when the backend span does not share the gateway trace id.
+    verification: test
+    allocated_to: [C4, C15, C14]
+    traces:
+      satisfies: [SOL-OBS-002]
+      use_cases: [UC-01]
+      standards: [OpenTelemetry, W3C Trace Context]
+    status: draft
+    owner: platform-operations

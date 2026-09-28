@@ -1,0 +1,22 @@
+set: SOL
+area: ORG
+requirements:
+  - id: SOL-ORG-001
+    title: Multi-tenant ownership model
+    layer: technology
+    type: system
+    level: system
+    priority: must
+    statement: The solution shall model API-provider teams as tenants with declared owners, isolated namespaces and scoped pipeline identities so that one team cannot change another team's APIs, policies or subscriptions.
+    rationale: Organisational accountability must be mirrored by technical isolation.
+    source: docs/02 UC-01
+    acceptance_criteria:
+      - A pipeline identity of tenant A receives an authorisation error when applying configuration into tenant B.
+      - Every API in the registry resolves to exactly one owning team.
+    verification: test
+    allocated_to: [C2, C4]
+    traces:
+      parents: [SOL-GOAL-003]
+      use_cases: [UC-01]
+    status: draft
+    owner: platform-architecture

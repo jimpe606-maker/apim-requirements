@@ -1,0 +1,76 @@
+set: IMPL
+area: ORG
+requirements:
+  - id: IMPL-ORG-001
+    title: Platform team with product ownership of the pipeline templates
+    layer: organization
+    type: organizational
+    level: top_level
+    priority: must
+    statement: The organisation shall establish a platform team that owns the golden API repository template, the pipeline template, the tenant onboarding process and the control plane, with a named product owner and an on-call rota.
+    rationale: Configuration as code shifts work from console operators to template and pipeline maintainers; that capability must be staffed.
+    source: docs/02 UC-01; SOL-ORG-001
+    acceptance_criteria:
+      - Team charter, product owner and rota are documented in the platform repository.
+      - Tenant onboarding (UC-01) completes within 2 working days measured over a quarter.
+    verification: inspection
+    allocated_to: [ORG]
+    traces:
+      satisfies: [SOL-ORG-001, SOL-CAC-001]
+      use_cases: [UC-01]
+    status: draft
+    owner: cio-office
+  - id: IMPL-ORG-002
+    title: API owner role and approval mandate
+    layer: organization
+    type: organizational
+    level: system
+    priority: must
+    statement: Every published API shall have a named API owner, recorded as a code owner in the API repository, who approves consumer subscriptions, version deprecations and policy changes affecting the API.
+    rationale: Approval-as-code only works if the approver is identified in the code-ownership mechanism.
+    source: docs/02 UC-03, UC-06
+    acceptance_criteria:
+      - Registry query returns an owner for 100 % of APIs.
+      - Subscription approvals in a sampled month were all performed by the recorded owner or delegate.
+    verification: inspection
+    allocated_to: [ORG, C3]
+    traces:
+      satisfies: [SOL-DEVX-001, SOL-ORG-001]
+      use_cases: [UC-03]
+    status: draft
+    owner: api-governance
+  - id: IMPL-ORG-003
+    title: Security ownership of guardrails and conformance
+    layer: organization
+    type: organizational
+    level: system
+    priority: must
+    statement: The information security function shall own, and review at least twice per year, the guardrail policies, the negative test suite and the FAPI conformance evidence.
+    rationale: Assigns the assurance responsibilities to the function accountable for them.
+    source: SOL-POL-002, SOL-SEC-002
+    acceptance_criteria:
+      - Review minutes exist for each half-year with resulting changes traced to pull requests.
+    verification: inspection
+    allocated_to: [ORG]
+    traces:
+      satisfies: [SOL-POL-002, SOL-SEC-002]
+      use_cases: [UC-06]
+    status: draft
+    owner: ciso
+  - id: IMPL-ORG-004
+    title: "Competence: policy-as-code and OAuth/FAPI training"
+    layer: organization
+    type: organizational
+    level: system
+    priority: should
+    statement: All members of the platform team and every API owner shall complete training in the policy language, the pipeline gates and the OAuth 2.1 / FAPI 2.0 flows before being granted code-owner approval rights.
+    rationale: Approval-as-code is only as good as the approvers' understanding.
+    source: Stakeholder need — competence
+    acceptance_criteria:
+      - Training completion is a prerequisite check in the code-owner onboarding process and is recorded.
+    verification: inspection
+    allocated_to: [ORG]
+    traces:
+      satisfies: [SOL-POL-001, SOL-SEC-001, SOL-SEC-012]
+    status: draft
+    owner: platform-team

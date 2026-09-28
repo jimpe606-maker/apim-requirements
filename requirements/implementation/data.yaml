@@ -1,0 +1,80 @@
+set: IMPL
+area: DATA
+requirements:
+  - id: IMPL-DATA-001
+    title: Consent purpose texts approved and versioned
+    layer: process
+    type: process
+    level: system
+    priority: should
+    statement: The data protection function shall approve and version every consent purpose text in the platform repository.
+    rationale: Consent is only demonstrable if the purpose text shown to the user is traceable to an approved version.
+    source: SOL-DATA-001
+    acceptance_criteria:
+      - Each purpose text in the repository has a version and an approval by the data protection function.
+    verification: test
+    allocated_to: [C3, C5, ORG]
+    traces:
+      satisfies: [SOL-DATA-001]
+      use_cases: [UC-04]
+      standards: [GDPR]
+    status: draft
+    owner: data-protection
+  - id: IMPL-DATA-002
+    title: Classification required on every API contract
+    layer: process
+    type: process
+    level: system
+    priority: must
+    statement: The pipeline shall reject every API contract that lacks a data classification from the vocabulary defined in the platform repository.
+    rationale: Classification drives the security profile, masking and retention, so it cannot be optional.
+    source: SOL-DATA-002
+    acceptance_criteria:
+      - Classification vocabulary is defined in the platform repository.
+      - A contract without a classification from that vocabulary fails the pipeline.
+    verification: test
+    allocated_to: [C4, C2]
+    traces:
+      satisfies: [SOL-DATA-002, SOL-POL-002]
+      use_cases: [UC-02]
+    status: draft
+    owner: data-protection
+  - id: IMPL-DATA-003
+    title: Masking rules per classification applied by the pipeline
+    layer: process
+    type: process
+    level: system
+    priority: must
+    statement: The pipeline shall apply the masking rules that the data protection function defines for each data classification to gateway responses, access logs and analytics exports of every deployed API.
+    rationale: Masking decided per API drifts; rules defined once per classification and applied automatically stay consistent.
+    source: SOL-DATA-003
+    acceptance_criteria:
+      - Masking rules exist in the platform repository for every classification and changes require data-protection approval.
+      - The post-deployment smoke test asserts that a field classified as personal data is absent from the access log.
+    verification: test
+    allocated_to: [C4, C1, C14]
+    traces:
+      satisfies: [SOL-DATA-003]
+      use_cases: [UC-05]
+    status: draft
+    owner: data-protection
+  - id: IMPL-DATA-004
+    title: Consent revocation tested before production
+    layer: process
+    type: process
+    level: system
+    priority: should
+    statement: The pipeline shall run a consent revocation test for each API that processes personal data before production deployment.
+    rationale: Revocation must be proven per API rather than assumed.
+    source: SOL-DATA-004
+    acceptance_criteria:
+      - Deploying an API classified as processing personal data fails without a passing revocation test.
+      - The revocation test asserts denial within 60 seconds of consent withdrawal.
+    verification: test
+    allocated_to: [C4, C7]
+    traces:
+      satisfies: [SOL-DATA-004]
+      use_cases: [UC-05]
+      standards: [GDPR]
+    status: draft
+    owner: data-protection

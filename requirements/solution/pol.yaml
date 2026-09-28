@@ -1,0 +1,59 @@
+set: SOL
+area: POL
+requirements:
+  - id: SOL-POL-001
+    title: Policy as code with offline lint and test
+    layer: technology
+    type: system
+    level: top_level
+    priority: must
+    statement: The solution shall express gateway and authorisation policies in a text-based, documented policy language that can be linted and unit-tested outside the runtime.
+    rationale: Policies are security-critical code; they must be reviewable and testable before deployment.
+    source: Stakeholder need — lint and verification of policy
+    acceptance_criteria:
+      - A policy syntax error is detected by a command-line tool without a running gateway.
+      - Policy unit tests can assert permit/deny for given inputs and run in CI.
+    verification: demonstration
+    allocated_to: [C1, C7, C4]
+    traces:
+      parents: [SOL-GOAL-003]
+      use_cases: [UC-02, UC-06]
+    status: draft
+    owner: security-architecture
+  - id: SOL-POL-002
+    title: Platform guardrails enforced on every API deployment
+    layer: technology
+    type: cybersecurity
+    level: system
+    priority: must
+    statement: The solution shall reject any API deployment that violates a platform-level guardrail policy (authentication required, audience set, rate limit present, data classification declared), with no means for an API team to override or bypass those policies.
+    rationale: Central security requirements must not depend on each team remembering them.
+    source: Stakeholder need — zero trust by default
+    acceptance_criteria:
+      - Deploying an API without a security scheme is rejected with a message naming the violated guardrail.
+      - Guardrails are versioned separately from team policies and can only be changed by the security owner.
+    verification: test
+    allocated_to: [C2, C4, C1]
+    traces:
+      parents: [SOL-POL-001]
+      use_cases: [UC-02]
+    status: draft
+    owner: security-architecture
+  - id: SOL-POL-003
+    title: Policy change impact analysis
+    layer: technology
+    type: system
+    level: system
+    priority: should
+    statement: Before a policy bundle is deployed, the solution shall report which APIs, clients and subscriptions are affected by the change.
+    rationale: Enables targeted review by affected API owners and reduces unintended outages.
+    source: docs/02 UC-06
+    acceptance_criteria:
+      - The impact report lists every API whose effective policy changes, verified against a known test set.
+    verification: test
+    allocated_to: [C2, C4]
+    traces:
+      parents: [SOL-POL-001]
+      use_cases: [UC-06]
+    status: draft
+    owner: security-architecture

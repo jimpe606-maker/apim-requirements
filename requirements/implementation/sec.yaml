@@ -1,0 +1,193 @@
+set: IMPL
+area: SEC
+requirements:
+  - id: IMPL-SEC-001
+    title: Sensitive classification applies the FAPI profile automatically
+    layer: process
+    type: process
+    level: system
+    priority: must
+    statement: The pipeline shall apply the FAPI 2.0 policy bundle (PAR, sender-constrained tokens, 10-minute token lifetime) to every API classified as sensitive.
+    rationale: Removes the per-team decision of whether to use the strong profile.
+    source: SOL-SEC-002
+    acceptance_criteria:
+      - Deploying a contract classified sensitive without the FAPI bundle is rejected by the guardrails.
+    verification: test
+    allocated_to: [C4, C1, C5]
+    traces:
+      satisfies: [SOL-SEC-002, SOL-GW-001]
+      related: [IMPL-DATA-002]
+      use_cases: [UC-05]
+    status: draft
+    owner: security-team
+  - id: IMPL-SEC-002
+    title: Consumer conformance before production
+    layer: process
+    type: process
+    level: system
+    priority: should
+    statement: A consumer application shall be promoted to production only after an automated conformance run against the sandbox has passed and the report has been attached to the subscription change record.
+    rationale: Operationalises SOL-DEVX-002.
+    source: SOL-DEVX-004
+    acceptance_criteria:
+      - Production promotion pipeline fails when the report artefact is missing or older than 30 days.
+    verification: test
+    allocated_to: [C4, C9]
+    traces:
+      satisfies: [SOL-DEVX-004, SOL-SEC-004]
+      use_cases: [UC-03]
+    status: draft
+    owner: api-governance
+  - id: IMPL-SEC-003
+    title: Break-glass runbook with two-person authorisation
+    layer: process
+    type: process
+    level: system
+    priority: must
+    statement: The operations team shall maintain a break-glass runbook requiring two-person authorisation and MFA.
+    rationale: Keeps emergency actions controlled and rehearsed.
+    source: SOL-SEC-008
+    acceptance_criteria:
+      - Runbook exists in the platform repository and is exercised in a quarterly drill.
+    verification: demonstration
+    allocated_to: [ORG, C2]
+    traces:
+      satisfies: [SOL-SEC-008]
+      use_cases: [UC-07]
+    status: draft
+    owner: platform-operations
+  - id: IMPL-SEC-004
+    title: Scope-to-assurance mapping maintained as code
+    layer: process
+    type: process
+    level: system
+    priority: must
+    statement: The security team shall maintain the mapping from scopes to required acr values in the platform repository.
+    rationale: The scope-to-assurance mapping is a security decision, so it must be versioned, reviewed and owned.
+    source: SOL-SEC-011
+    acceptance_criteria:
+      - The scope-to-acr mapping file exists in the platform repository and changes to it require security-team approval.
+    verification: test
+    allocated_to: [C3, C5, ORG]
+    traces:
+      satisfies: [SOL-SEC-011]
+      use_cases: [UC-04]
+      standards: [OpenID Connect Core, RFC 8176]
+    status: draft
+    owner: security-team
+  - id: IMPL-SEC-005
+    title: Backends accept only gateway workload identity
+    layer: process
+    type: process
+    level: system
+    priority: must
+    statement: Every API provider team shall configure its backend to accept only mutually authenticated connections from the gateway workload identity and to verify the propagated identity assertion.
+    rationale: Gateway-side mTLS gives no protection if backends still accept direct or unauthenticated calls.
+    source: SOL-SEC-006, SOL-SEC-009
+    acceptance_criteria:
+      - A direct call to the backend without the gateway certificate is rejected.
+      - A call carrying a tampered identity assertion is rejected.
+    verification: test
+    allocated_to: [C15, C11, ORG]
+    traces:
+      satisfies: [SOL-SEC-006, SOL-SEC-009]
+      use_cases: [UC-01, UC-05]
+      standards: [RFC 8705, SPIFFE]
+    status: draft
+    owner: security-team
+  - id: IMPL-SEC-006
+    title: Break-glass changes reconciled to Git within 24 hours
+    layer: process
+    type: process
+    level: system
+    priority: must
+    statement: Every break-glass change shall be reflected in Git by a follow-up pull request within 24 hours or reverted by drift reconciliation.
+    rationale: Returns the system to its code-defined state after an emergency and keeps the change history complete.
+    source: SOL-SEC-007, SOL-CAC-003
+    acceptance_criteria:
+      - Drift report after a drill shows the emergency change reconciled within 24 hours.
+    verification: test
+    allocated_to: [C2, C3, C14]
+    traces:
+      satisfies: [SOL-SEC-008, SOL-CAC-004]
+      use_cases: [UC-07]
+    status: draft
+    owner: platform-operations
+  - id: IMPL-SEC-007
+    title: Pipeline rejects high-risk scopes without an assurance mapping
+    layer: process
+    type: process
+    level: system
+    priority: must
+    statement: The pipeline shall reject any API contract that declares a high-risk scope without a mapped acr value.
+    rationale: Step-up only protects the operations that are mapped to it, so every high-risk scope must be mapped before deployment.
+    source: SOL-SEC-003
+    acceptance_criteria:
+      - A contract declaring a high-risk scope missing from the mapping fails the pipeline.
+      - An end-to-end test in the pre-production environment verifies step-up for each mapped high-risk scope.
+    verification: test
+    allocated_to: [C4, C5]
+    traces:
+      satisfies: [SOL-SEC-011]
+      use_cases: [UC-04]
+      standards: [OpenID Connect Core, RFC 8176]
+    status: draft
+    owner: security-team
+  - id: IMPL-SEC-008
+    title: Onboarding gate for backend identity checks
+    layer: process
+    type: process
+    level: system
+    priority: must
+    statement: The platform onboarding pipeline shall enable production routing to a backend only after the backend has passed the direct-call and tampered-assertion negative tests.
+    rationale: Makes the backend configuration a hard onboarding gate instead of a recommendation.
+    source: SOL-SEC-006
+    acceptance_criteria:
+      - The onboarding pipeline runs both negative tests and records the results.
+      - Production routing for a backend is enabled only after both tests are recorded as passed.
+    verification: test
+    allocated_to: [C4, C1]
+    traces:
+      satisfies: [SOL-SEC-006, SOL-SEC-009]
+      use_cases: [UC-01, UC-05]
+      standards: [RFC 8705, SPIFFE]
+    status: draft
+    owner: platform-operations
+  - id: IMPL-SEC-009
+    title: Revocation drill every 6 months
+    layer: process
+    type: process
+    level: system
+    priority: must
+    statement: The operations team shall run a revocation drill in production at least every 6 months that revokes a test client, token and certificate and records the time until the gateway rejects each.
+    rationale: Revocation paths are rarely used and fail silently; a drill proves the 60-second target end to end.
+    source: SOL-SEC-007
+    acceptance_criteria:
+      - Each drill report shows rejection at the gateway within 60 seconds for client, token and certificate revocation.
+      - Findings from each drill are tracked as issues in the platform repository.
+    verification: demonstration
+    allocated_to: [C5, C1, C10, ORG]
+    traces:
+      satisfies: [SOL-SEC-007]
+      use_cases: [UC-07]
+    status: draft
+    owner: platform-operations
+  - id: IMPL-SEC-010
+    title: End-user login only through the organisation's identity provider
+    layer: process
+    type: process
+    level: system
+    priority: must
+    statement: The platform team shall configure the authorization server so that end users authenticate only through the organisation's OpenID Connect identity provider, with local end-user accounts disabled in every environment.
+    rationale: Local accounts on the authorization server bypass the organisation's authentication policy and account lifecycle.
+    source: SOL-SEC-003
+    acceptance_criteria:
+      - The authorization server configuration in the platform repository names a single upstream identity provider for end users.
+      - The guardrail stage rejects any configuration that enables local end-user accounts.
+    verification: inspection
+    allocated_to: [C5, C6, C4]
+    traces:
+      satisfies: [SOL-SEC-003]
+      use_cases: [UC-04]
+    status: draft
+    owner: platform-team

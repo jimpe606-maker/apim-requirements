@@ -1,0 +1,68 @@
+set: PROC
+area: DATA
+requirements:
+  - id: PROC-DATA-001
+    title: Consent capture and per-request consent enforcement
+    layer: technology
+    type: assurance
+    level: system
+    priority: should
+    statement: The offer shall be scored on its ability to record end-user consent per scope and purpose at authorisation time, expose the consent state to an external policy decision point, and enforce consent revocation on API requests within 60 seconds.
+    rationale: GDPR requires demonstrable, revocable consent, and products differ in whether consent is a first-class record or has to be built by the buyer.
+    source: SOL-DATA-001
+    acceptance_criteria:
+      - Consent records contain timestamp, scopes, purpose text version and client_id.
+      - After consent revocation, API requests for the revoked scope are denied within 60 seconds.
+      - The consent state can be queried by the buyer's policy decision point through a documented API.
+    verification: test
+    allocated_to: [C5, C7, C8]
+    traces:
+      satisfies: [SOL-DATA-001, SOL-DATA-004]
+      use_cases: [UC-04, UC-05]
+      standards: [GDPR]
+    procurement:
+      kind: evaluated
+      evidence_required:
+        - Test execution log for consent capture and revocation
+        - Sample consent record
+        - API documentation for consent state queries
+      scoring:
+        max_points: 5
+        weight: 1.0
+        scale:
+          - points: 5
+            condition: Consent is a native record with a documented query API, and revocation is enforced within 60 seconds with configuration only.
+          - points: 3
+            condition: Consent is captured natively, but exposing it to the decision point needs a vendor-supplied extension.
+          - points: 1
+            condition: Consent capture or enforcement requires buyer-written custom code.
+          - points: 0
+            condition: Consent per scope and purpose cannot be recorded.
+    status: draft
+    owner: procurement
+  - id: PROC-DATA-002
+    title: Classified fields masked in responses and logs
+    layer: technology
+    type: assurance
+    level: system
+    priority: must
+    statement: The offer shall pass the buyer's data-classification test, in which fields annotated as personal data in a sample contract are masked or removed from responses, access logs and analytics exports by declarative policy alone.
+    rationale: Leakage of classified data through logs and analytics is a common and costly failure, and products differ in whether masking is driven by the contract or configured by hand per route.
+    source: SOL-DATA-002
+    acceptance_criteria:
+      - A sample contract without a classification annotation is rejected at deployment.
+      - No field annotated as personal data appears in the captured responses, access logs or analytics exports from the test run.
+      - Masking is configured declaratively from the contract annotations with no vendor-supplied custom scripts.
+    verification: test
+    allocated_to: [C1, C14, C4]
+    traces:
+      satisfies: [SOL-DATA-002, SOL-DATA-003]
+      use_cases: [UC-02, UC-05]
+      standards: [GDPR]
+    procurement:
+      kind: mandatory
+      evidence_required:
+        - Test execution log with captured responses, access logs and analytics export
+        - Configuration artefacts used during the test run
+    status: draft
+    owner: procurement

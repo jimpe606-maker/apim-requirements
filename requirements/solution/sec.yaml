@@ -1,0 +1,243 @@
+set: SOL
+area: SEC
+requirements:
+  - id: SOL-SEC-001
+    title: OAuth 2.1 access token required for all API access
+    layer: technology
+    type: cybersecurity
+    level: top_level
+    priority: must
+    statement: The solution shall require an OAuth 2.1 access token for every API request unless an explicit, reviewed policy exception recorded as code allows anonymous access.
+    rationale: Every API call must carry a verifiable authorisation; anonymous access must be a deliberate, reviewable decision.
+    source: OAuth 2.1 draft; RFC 9700 (OAuth Security BCP)
+    acceptance_criteria:
+      - A request to a protected API without an access token is rejected with HTTP 401.
+      - Anonymous access to an API is only possible through an explicit, reviewed policy exception recorded as code.
+    verification: test
+    allocated_to: [C1, C5]
+    traces:
+      parents: [SOL-GOAL-001]
+      use_cases: [UC-04, UC-05]
+      standards: [OAuth 2.1, RFC 9700]
+    status: draft
+    owner: security-architecture
+  - id: SOL-SEC-002
+    title: FAPI 2.0 Security Profile for sensitive APIs
+    layer: technology
+    type: cybersecurity
+    level: system
+    priority: must
+    statement: For APIs classified as sensitive, the solution shall implement the FAPI 2.0 Security Profile, including pushed authorization requests (RFC 9126), private_key_jwt or mTLS client authentication, sender-constrained access tokens (DPoP or mTLS-bound), issuer identification (RFC 9207) and access token lifetimes of at most 10 minutes.
+    rationale: FAPI 2.0 is the only widely adopted, conformance-testable profile that closes token theft, mix-up and injection attacks.
+    source: OpenID FAPI 2.0 Security Profile (final)
+    acceptance_criteria:
+      - The authorization server passes the OpenID Foundation FAPI 2.0 Security Profile conformance suite for the selected client authentication and sender-constraint options.
+      - Authorization requests not initiated via PAR are rejected for sensitive APIs.
+      - Client secrets cannot be configured for confidential clients on sensitive APIs.
+    verification: evidence
+    allocated_to: [C5, C1, C10]
+    traces:
+      parents: [SOL-SEC-001]
+      use_cases: [UC-04, UC-05]
+      standards: [FAPI 2.0 Security Profile, RFC 9126, RFC 9449, RFC 8705, RFC 7523, RFC 9207]
+    status: draft
+    owner: security-architecture
+  - id: SOL-SEC-003
+    title: End-user authentication delegated to an OpenID Connect provider
+    layer: technology
+    type: cybersecurity
+    level: system
+    priority: must
+    statement: The solution shall delegate end-user authentication to an OpenID Connect identity provider.
+    rationale: A central identity provider enforces the organisation's authentication policy, such as MFA and account lifecycle, in one place.
+    source: OpenID Connect Core; stakeholder need — central identity
+    acceptance_criteria:
+      - End-user login for a user-facing scope is performed at the configured OpenID Connect identity provider.
+      - The authorization server stores no end-user passwords.
+    verification: test
+    allocated_to: [C5, C6]
+    traces:
+      parents: [SOL-GOAL-001]
+      use_cases: [UC-04]
+      standards: [OpenID Connect Core]
+    status: draft
+    owner: security-architecture
+  - id: SOL-SEC-004
+    title: Public-key client credentials only
+    layer: technology
+    type: cybersecurity
+    level: system
+    priority: must
+    statement: The solution shall register API consumer applications only with asymmetric credentials (JWKS URI or X.509 certificate).
+    rationale: Shared secrets leak; asymmetric keys keep the private key with the consumer.
+    source: Zero-trust reference architecture (docs/01)
+    acceptance_criteria:
+      - Registration of a client with a shared client secret is refused.
+      - Key rotation by the consumer (new kid in JWKS) requires no change on the platform side.
+    verification: test
+    allocated_to: [C10, C5, C4]
+    traces:
+      parents: [SOL-GOAL-001]
+      use_cases: [UC-03]
+      standards: [RFC 7523, RFC 8705]
+    status: draft
+    owner: security-architecture
+  - id: SOL-SEC-005
+    title: Token signing keys held in HSM or KMS with rotation
+    layer: technology
+    type: information_security
+    level: component
+    priority: must
+    statement: The authorization server shall sign tokens with keys that are generated and stored in an HSM or cloud KMS, are non-exportable, and can be rotated with a publication overlap period without service interruption.
+    rationale: Compromise of the signing key compromises every API; key custody must be provable.
+    source: FAPI 2.0; ISO/IEC 27001 A.8.24
+    acceptance_criteria:
+      - Signing key export is technically impossible and this is shown in vendor documentation.
+      - A rotation is performed in a test environment with zero failed token validations during the overlap.
+      - Every signing operation is logged to the audit log with key id.
+    verification: demonstration
+    allocated_to: [C5, C12]
+    traces:
+      parents: [SOL-SEC-002]
+      use_cases: [UC-04, UC-07]
+    status: draft
+    owner: security-architecture
+  - id: SOL-SEC-006
+    title: Mutually authenticated gateway-to-backend traffic with workload identity
+    layer: technology
+    type: cybersecurity
+    level: system
+    priority: must
+    statement: The gateway shall call backend APIs over mutually authenticated TLS using short-lived workload certificates.
+    rationale: East-west traffic is inside the trust boundary in legacy designs; zero trust requires the backend to verify the gateway and receive an authenticated context.
+    source: NIST SP 800-207; SPIFFE
+    acceptance_criteria:
+      - A backend rejects a direct call that does not present the gateway's workload certificate.
+      - Workload certificates have a lifetime of at most 24 hours and are renewed automatically.
+    verification: test
+    allocated_to: [C1, C11, C15]
+    traces:
+      parents: [SOL-GOAL-001]
+      use_cases: [UC-05]
+      standards: [RFC 8705, SPIFFE]
+    status: draft
+    owner: security-architecture
+  - id: SOL-SEC-007
+    title: Revocation effective at the gateway within 60 seconds
+    layer: technology
+    type: cybersecurity
+    level: system
+    priority: must
+    statement: The solution shall enforce revocation of clients, tokens and certificates at the gateway within 60 seconds.
+    rationale: Revocation that waits for token expiry leaves a compromised client active for the full token lifetime.
+    source: Stakeholder need — incident response
+    acceptance_criteria:
+      - After revoking a client, its valid access token is rejected at the gateway within 60 seconds.
+      - After revoking a client certificate, tokens bound to it are rejected at the gateway within 60 seconds.
+    verification: test
+    allocated_to: [C5, C1, C10, C14]
+    traces:
+      parents: [SOL-GOAL-001]
+      use_cases: [UC-07]
+      standards: [RFC 7009]
+    status: draft
+    owner: security-architecture
+  - id: SOL-SEC-008
+    title: Time-boxed, multi-factor, audited break-glass access
+    layer: technology
+    type: cybersecurity
+    level: system
+    priority: must
+    statement: The solution shall provide a time-boxed, multi-factor break-glass access mode whose every action is written to the audit log.
+    rationale: Configuration as code must not prevent an emergency response; but the emergency path must be as auditable as the normal path.
+    source: Stakeholder need — incident response
+    acceptance_criteria:
+      - Break-glass credentials expire automatically after a configurable period not exceeding 4 hours.
+      - Every break-glass action produces an audit event including operator identity and justification.
+    verification: test
+    allocated_to: [C2, C5, C14]
+    traces:
+      parents: [SOL-CAC-002]
+      use_cases: [UC-07]
+    status: draft
+    owner: security-architecture
+  - id: SOL-SEC-009
+    title: Signed caller-identity propagation to backends
+    layer: technology
+    type: cybersecurity
+    level: system
+    priority: must
+    statement: The gateway shall propagate the verified caller identity to the backend as a signed assertion.
+    rationale: Backends need an authenticated caller context for their own authorisation decisions without trusting unsigned headers.
+    source: NIST SP 800-207; SPIFFE
+    acceptance_criteria:
+      - The propagated identity assertion is signed and includes subject, client_id, scopes and acr.
+      - The backend verifies the assertion signature with keys published by the platform.
+    verification: test
+    allocated_to: [C1, C15, C12]
+    traces:
+      parents: [SOL-GOAL-001]
+      use_cases: [UC-05]
+      standards: [RFC 7519]
+    status: draft
+    owner: security-architecture
+  - id: SOL-SEC-010
+    title: Pipeline-driven dynamic client registration
+    layer: technology
+    type: cybersecurity
+    level: system
+    priority: must
+    statement: The solution shall support Dynamic Client Registration and management (RFC 7591, RFC 7592) driven by the pipeline rather than by console interaction.
+    rationale: Registration through a console is click-ops for the most frequent credential change and cannot be reviewed or reproduced.
+    source: Zero-trust reference architecture (docs/01)
+    acceptance_criteria:
+      - A client registered via DCR by the pipeline with a JWKS URI authenticates with private_key_jwt without any manual step.
+      - Client metadata is updated through RFC 7592 by the pipeline with no console interaction.
+    verification: test
+    allocated_to: [C10, C5, C4]
+    traces:
+      parents: [SOL-SEC-004, SOL-CAC-001]
+      use_cases: [UC-03]
+      standards: [RFC 7591, RFC 7592]
+    status: draft
+    owner: security-architecture
+  - id: SOL-SEC-011
+    title: Step-up authentication with authentication context in tokens
+    layer: technology
+    type: cybersecurity
+    level: system
+    priority: must
+    statement: The solution shall support step-up authentication based on requested scope or resource, with the achieved authentication context (acr, amr) conveyed in the token.
+    rationale: Authorisation decisions for high-risk operations depend on assurance level of the user authentication.
+    source: OpenID Connect Core; stakeholder need — MFA for payment scopes
+    acceptance_criteria:
+      - A request for a scope marked high-assurance triggers re-authentication when the current acr is insufficient.
+      - The access token or introspection response exposes acr and amr claims.
+    verification: test
+    allocated_to: [C5, C6]
+    traces:
+      parents: [SOL-SEC-003]
+      use_cases: [UC-04]
+      standards: [OpenID Connect Core, RFC 8176, RFC 9470]
+    status: draft
+    owner: security-architecture
+  - id: SOL-SEC-012
+    title: Only authorization code with PKCE and client credentials grants
+    layer: technology
+    type: cybersecurity
+    level: system
+    priority: must
+    statement: The solution shall issue access tokens only through the authorization_code grant with PKCE S256 and the client_credentials grant.
+    rationale: OAuth 2.1 consolidates the security best current practice and removes deprecated grants.
+    source: OAuth 2.1 draft; RFC 9700 (OAuth Security BCP)
+    acceptance_criteria:
+      - An authorization request without code_challenge is rejected.
+      - Requests using response_type=token or grant_type=password are rejected.
+    verification: test
+    allocated_to: [C5]
+    traces:
+      parents: [SOL-SEC-001]
+      use_cases: [UC-04]
+      standards: [OAuth 2.1, RFC 7636, RFC 9700]
+    status: draft
+    owner: security-architecture

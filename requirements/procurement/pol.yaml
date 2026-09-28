@@ -1,0 +1,87 @@
+set: PROC
+area: POL
+requirements:
+  - id: PROC-POL-001
+    title: Policy language lintability and testability
+    layer: technology
+    type: assurance
+    level: system
+    priority: should
+    statement: The offer shall be scored on whether gateway and authorisation policies are expressed in an open, text-based language with a vendor-supported command-line linter and unit-test runner usable in the buyer's CI.
+    rationale: Distinguishes products with real policy-as-code from products with exportable but opaque configuration.
+    source: SOL-POL-001
+    acceptance_criteria:
+      - Linter and test runner execute in a container in the buyer's CI without a licensed runtime.
+      - The policy language specification is publicly documented.
+    verification: demonstration
+    allocated_to: [C4, C1, C7]
+    traces:
+      satisfies: [SOL-POL-001, SOL-POL-002]
+    procurement:
+      kind: evaluated
+      evidence_required:
+        - Demonstration in buyer CI
+        - Language documentation
+      scoring:
+        max_points: 5
+        weight: 1.0
+        scale:
+          - points: 5
+            condition: Open language (e.g. Rego/Cedar or vendor DSL with public spec), offline lint and unit tests, plus impact analysis.
+          - points: 3
+            condition: Offline lint and unit tests without impact analysis.
+          - points: 1
+            condition: Lint only, tests require a running instance.
+          - points: 0
+            condition: Policies are only editable in a console or opaque export.
+    status: draft
+    owner: procurement
+  - id: PROC-POL-002
+    title: Minimum policy-as-code capability
+    layer: technology
+    type: assurance
+    level: system
+    priority: must
+    statement: The offer shall demonstrate that gateway and authorisation policies are stored as text files that a vendor-supported command-line tool lints in the buyer's CI without a running gateway.
+    rationale: Policies that exist only in a console cannot be reviewed, versioned or tested, so their absence must disqualify the offer; PROC-POL-001 then scores unit testing and impact analysis.
+    source: SOL-POL-001
+    acceptance_criteria:
+      - A policy file with a syntax error fails the lint step in the buyer's CI.
+      - The lint step runs in a container without a gateway instance or licensed runtime.
+    verification: demonstration
+    allocated_to: [C4, C1, C7]
+    traces:
+      satisfies: [SOL-POL-001]
+      related: [PROC-POL-001]
+      use_cases: [UC-06]
+    procurement:
+      kind: mandatory
+      evidence_required:
+        - CI run log showing the failed lint
+        - Container image reference for the lint tool
+    status: draft
+    owner: procurement
+  - id: PROC-POL-003
+    title: Non-overridable platform guardrails
+    layer: technology
+    type: assurance
+    level: system
+    priority: must
+    statement: The offer shall pass the buyer's guardrail test, in which deployments lacking authentication, an audience, a rate limit or a data classification are rejected, and an API team identity cannot modify or bypass the guardrail policies.
+    rationale: Guardrails are the platform's baseline security controls, and a product where API teams can override them cannot enforce the baseline.
+    source: SOL-POL-002
+    acceptance_criteria:
+      - Each of the four non-compliant sample deployments is rejected with a message naming the violated guardrail.
+      - An attempt by an API team identity to change or disable a guardrail policy is denied and audited.
+    verification: test
+    allocated_to: [C2, C4, C1]
+    traces:
+      satisfies: [SOL-POL-002]
+      use_cases: [UC-02, UC-06]
+    procurement:
+      kind: mandatory
+      evidence_required:
+        - Test execution log for the four non-compliant deployments
+        - Audit record of the denied guardrail change
+    status: draft
+    owner: procurement

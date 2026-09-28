@@ -1,0 +1,67 @@
+set: PROC
+area: OBS
+requirements:
+  - id: PROC-OBS-001
+    title: Native OpenTelemetry export and trace propagation
+    layer: technology
+    type: assurance
+    level: system
+    priority: should
+    statement: The offer shall be scored on native OpenTelemetry export of metrics, traces and logs from the gateway and control plane and on W3C Trace Context propagation to backends, verified against the buyer's tracing backend.
+    rationale: Proprietary telemetry formats lock the buyer into the vendor's monitoring stack and break end-to-end tracing.
+    source: SOL-OBS-002
+    acceptance_criteria:
+      - A trace started at the gateway appears end to end, including the backend span, in the buyer's tracing backend.
+      - Metrics and logs arrive at the buyer's OpenTelemetry collector over OTLP without a vendor-specific agent.
+    verification: demonstration
+    allocated_to: [C1, C2, C14]
+    traces:
+      satisfies: [SOL-OBS-002]
+      use_cases: [UC-05]
+      standards: [OpenTelemetry, W3C Trace Context]
+    procurement:
+      kind: evaluated
+      evidence_required:
+        - Screenshot or export of the end-to-end trace from the buyer's tracing backend
+        - Collector configuration used during the demonstration
+      scoring:
+        max_points: 5
+        weight: 1.0
+        scale:
+          - points: 5
+            condition: Metrics, traces and logs exported natively over OTLP from gateway and control plane, with W3C Trace Context propagation.
+          - points: 3
+            condition: Traces and metrics native over OTLP; logs need a vendor agent or format conversion.
+          - points: 1
+            condition: OpenTelemetry support only through a vendor-specific agent or exporter.
+          - points: 0
+            condition: No end-to-end trace in the buyer's tracing backend.
+    status: draft
+    owner: procurement
+  - id: PROC-OBS-002
+    title: Tamper-evident, exportable audit log
+    layer: technology
+    type: assurance
+    level: system
+    priority: must
+    statement: The offer shall demonstrate that modifying or deleting an existing audit record for a configuration change, credential event or access decision is detected by hash chaining or by writing to an external immutable store.
+    rationale: Audit logs that administrators can silently alter provide no non-repudiation, which zero trust and external audit both depend on.
+    source: SOL-OBS-001
+    acceptance_criteria:
+      - An attempted modification of a stored audit record during the demonstration is detected and reported.
+      - Access-decision records contain client_id, pseudonymised subject, scopes, decision and policy version.
+      - Audit records are exported in a documented structured format during the demonstration.
+    verification: demonstration
+    allocated_to: [C14, C2, C5, C1]
+    traces:
+      satisfies: [SOL-OBS-001]
+      use_cases: [UC-05, UC-07]
+      standards: [ISO/IEC 27001]
+    procurement:
+      kind: mandatory
+      evidence_required:
+        - Recorded demonstration of tamper detection
+        - Audit record format documentation
+        - Sample exported audit records
+    status: draft
+    owner: procurement

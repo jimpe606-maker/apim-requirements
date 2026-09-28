@@ -1,0 +1,35 @@
+set: PROC
+area: COM
+requirements:
+  - id: PROC-COM-001
+    title: Licensing model neutral to deployment automation
+    layer: process
+    type: assurance
+    level: system
+    priority: should
+    statement: The offer shall be scored on whether the licence permits unlimited ephemeral environments for CI testing and does not meter API definitions, environments or pipeline identities.
+    rationale: Metering per environment or per API penalises exactly the CI/CD behaviour the solution requires.
+    source: SOL-CAC-003; SOL-COM-001
+    acceptance_criteria:
+      - Licence terms state the metric; ephemeral test environments are explicitly free of charge.
+    verification: evidence
+    allocated_to: [ORG]
+    traces:
+      satisfies: [SOL-CAC-003, SOL-COM-001]
+    procurement:
+      kind: evaluated
+      evidence_required:
+        - Licence terms
+        - Price model description
+      scoring:
+        max_points: 3
+        weight: 1.0
+        scale:
+          - points: 3
+            condition: Metric is traffic or gateway instances in production only.
+          - points: 1
+            condition: Metric includes non-production environments with a capped surcharge.
+          - points: 0
+            condition: Metric counts APIs, environments or pipeline identities.
+    status: draft
+    owner: procurement

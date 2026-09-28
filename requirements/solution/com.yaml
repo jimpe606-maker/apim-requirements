@@ -1,0 +1,20 @@
+set: SOL
+area: COM
+requirements:
+  - id: SOL-COM-001
+    title: Exit and portability
+    layer: technology
+    type: system
+    level: system
+    priority: should
+    statement: The solution shall allow export of all API contracts, policies, client registrations (public keys) and audit logs in documented open formats so that the buyer can migrate to another product.
+    rationale: Configuration as code should reduce lock-in; the export must prove it.
+    source: Stakeholder need — exit strategy
+    acceptance_criteria:
+      - A full export contains OpenAPI documents, policy source files, client metadata (RFC 7591 format) and audit records in JSON.
+    verification: demonstration
+    allocated_to: [C2, C10, C14]
+    traces:
+      parents: [SOL-CAC-001, SOL-GOAL-007]
+    status: draft
+    owner: procurement

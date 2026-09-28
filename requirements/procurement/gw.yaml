@@ -1,0 +1,95 @@
+set: PROC
+area: GW
+requirements:
+  - id: PROC-GW-001
+    title: Contract enforcement and threat protection test suite
+    layer: technology
+    type: assurance
+    level: system
+    priority: must
+    statement: The offer shall pass the buyer's gateway enforcement test suite, covering OpenAPI request and response schema violations, content-type and size-limit violations, undeclared headers and per-client rate limits, using native documented configuration only.
+    rationale: Contract enforcement at the edge is a must-have security boundary, and support ranges from native to plugin-based to absent, so it is verified by executing tests rather than by reading feature lists.
+    source: SOL-GW-002
+    acceptance_criteria:
+      - Every request-schema, content-type and size-limit violation in the suite is rejected with HTTP 400 or 413 without reaching the test backend.
+      - A backend response containing an undeclared property is blocked or masked according to the configured policy.
+      - Exceeding a per-client limit returns HTTP 429 with a Retry-After header while other clients remain unaffected.
+      - All enforcement is expressed as declarative configuration derived from the OpenAPI contract, with no vendor-supplied custom scripts.
+    verification: test
+    allocated_to: [C1, C13]
+    traces:
+      satisfies: [SOL-GW-002, SOL-GW-004]
+      use_cases: [UC-05]
+      standards: [OpenAPI 3.x, OWASP API Security Top 10]
+    procurement:
+      kind: mandatory
+      evidence_required:
+        - Test execution log against the buyer test suite for the offered version
+        - Configuration artefacts used during the test run
+        - Product documentation reference for each enforcement feature
+    status: draft
+    owner: procurement
+  - id: PROC-GW-002
+    title: External policy decision point integration and obligation enforcement
+    layer: technology
+    type: assurance
+    level: system
+    priority: should
+    statement: The offer shall be scored on the gateway's native ability to delegate per-request authorisation to a buyer-supplied external policy decision point, enforce deny, field-masking and row-filtering obligations, and fail closed when the decision point is unavailable.
+    rationale: Externalised authorisation is only useful if the gateway enforces obligations and fails closed, and support ranges from native to custom-coded.
+    source: SOL-GW-003
+    acceptance_criteria:
+      - A policy change in the buyer-supplied decision point changes gateway behaviour without redeploying the API.
+      - Deny, field-masking and row-filtering obligations are each enforced in the test run.
+      - With the decision point stopped, requests are denied unless a policy explicitly permits cached decisions for a bounded TTL.
+    verification: test
+    allocated_to: [C1, C7, C8]
+    traces:
+      satisfies: [SOL-GW-003, SOL-GW-005]
+      use_cases: [UC-05, UC-06]
+    procurement:
+      kind: evaluated
+      evidence_required:
+        - Test execution log against the buyer's decision-point test suite
+        - Configuration artefacts used for the integration
+        - Product documentation reference for the external authorisation feature
+      scoring:
+        max_points: 5
+        weight: 1.0
+        scale:
+          - points: 5
+            condition: All three obligations and fail-closed behaviour work with native, documented configuration and a standard decision-point interface such as AuthZEN or the OPA REST API.
+          - points: 3
+            condition: Deny and fail-closed work natively; masking or filtering needs a vendor-supplied plugin.
+          - points: 1
+            condition: External authorisation works only with buyer-written custom code.
+          - points: 0
+            condition: The gateway cannot delegate decisions or does not fail closed.
+    status: draft
+    owner: procurement
+  - id: PROC-GW-003
+    title: Minimum token and sender-constraint validation at the gateway
+    layer: technology
+    type: assurance
+    level: system
+    priority: must
+    statement: The offer shall pass the buyer's token validation test, in which the gateway rejects with HTTP 401 every request carrying a token with an invalid signature, issuer, audience, expiry or scope, or a failed DPoP or mTLS sender-constraint check.
+    rationale: Per-request token and sender-constraint validation is the core zero-trust control, so failing it must disqualify the offer; PROC-SEC-002 then scores how natively it is achieved.
+    source: SOL-GW-001
+    acceptance_criteria:
+      - Every negative case in the buyer's suite returns HTTP 401 without reaching the test backend.
+      - Validation adds no more than 5 ms at the 95th percentile, measured with cached keys.
+    verification: test
+    allocated_to: [C1]
+    traces:
+      satisfies: [SOL-GW-001, SOL-SEC-001]
+      related: [PROC-SEC-002]
+      use_cases: [UC-05]
+      standards: [RFC 9449, RFC 8705, RFC 9068]
+    procurement:
+      kind: mandatory
+      evidence_required:
+        - Test execution log against the buyer's token validation suite
+        - Latency measurement report
+    status: draft
+    owner: procurement

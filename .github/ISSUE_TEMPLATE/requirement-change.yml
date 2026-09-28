@@ -1,0 +1,40 @@
+name: Requirement change
+description: Report a problem with a requirement or propose a new one
+labels: ["requirement"]
+body:
+  - type: input
+    id: ids
+    attributes:
+      label: Requirement ID(s)
+      description: Leave empty for a new requirement.
+      placeholder: SOL-SEC-003, PROC-SEC-004
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind of change
+      options:
+        - Ambiguous or not verifiable
+        - Wrong or outdated standard reference
+        - Priority or scoring should change
+        - Coverage gap (missing PROC or IMPL record)
+        - New requirement
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What is wrong or missing, and what could go wrong in a real procurement or delivery because of it?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed wording or change
+      description: Optional. A draft statement and acceptance criteria help a lot.
+  - type: input
+    id: affiliation
+    attributes:
+      label: Affiliation (optional)
+      description: For example buyer, vendor, consultant. Vendors, please disclose.

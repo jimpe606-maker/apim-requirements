@@ -1,0 +1,109 @@
+set: PROC
+area: CAC
+requirements:
+  - id: PROC-CAC-001
+    title: Declarative configuration of all security-relevant objects
+    layer: technology
+    type: assurance
+    level: system
+    priority: must
+    statement: The offer shall demonstrate, in a live evaluation using the buyer's sample configuration, that every security-relevant configuration object type can be applied declaratively from files through an API or CLI.
+    rationale: Makes SOL-CAC-001 discriminating between API-first products and products that bolt an API onto a console.
+    source: SOL-CAC-001
+    acceptance_criteria:
+      - Vendor completes the buyer's coverage matrix (one row per configuration object type) with Full / Partial / Console-only and a reference to the schema.
+      - Every security-relevant object type is Full and is applied from files in the live evaluation.
+    verification: demonstration
+    allocated_to: [C2, C4]
+    traces:
+      satisfies: [SOL-CAC-001, SOL-CAC-003]
+    procurement:
+      kind: mandatory
+      evidence_required:
+        - Completed coverage matrix
+        - Recorded live demonstration
+        - Public schema documentation for every artefact type
+    status: draft
+    owner: procurement
+  - id: PROC-CAC-002
+    title: Read-only human roles and pipeline-scoped write identities
+    layer: technology
+    type: assurance
+    level: system
+    priority: must
+    statement: The offer shall show that the product supports a read-only role for all human users of the control plane and workload-identity-based write access scoped to tenant and environment.
+    rationale: Evaluates SOL-CAC-002 with pass/fail evidence.
+    source: SOL-CAC-002
+    acceptance_criteria:
+      - Role matrix from vendor documentation shows a role with no create/update/delete permissions.
+      - Demonstration of a pipeline identity denied when writing to another tenant.
+    verification: demonstration
+    allocated_to: [C2]
+    traces:
+      satisfies: [SOL-CAC-002, SOL-ORG-001]
+    procurement:
+      kind: mandatory
+      evidence_required:
+        - Role and permission documentation
+        - Recorded demonstration
+    status: draft
+    owner: procurement
+  - id: PROC-CAC-003
+    title: Completeness of declarative configuration coverage
+    layer: technology
+    type: assurance
+    level: system
+    priority: should
+    statement: The offer shall be scored on the share of all offered configuration object types that can be applied declaratively from files, and on whether a torn-down environment is rebuilt from files in the live evaluation.
+    rationale: Coverage beyond the security-relevant minimum reduces the remaining click-ops surface and makes environments reproducible.
+    source: SOL-CAC-001
+    acceptance_criteria:
+      - The coverage matrix classifies every configuration object type as Full, Partial or Console-only.
+      - The live evaluation attempts to rebuild a torn-down environment from files only.
+    verification: demonstration
+    allocated_to: [C2, C4]
+    traces:
+      satisfies: [SOL-CAC-001, SOL-CAC-003]
+      related: [PROC-CAC-001]
+    procurement:
+      kind: evaluated
+      evidence_required:
+        - Completed coverage matrix
+        - Recorded live demonstration
+        - Public schema documentation for every artefact type
+      scoring:
+        max_points: 5
+        weight: 1.0
+        scale:
+          - points: 5
+            condition: 100 % of object types Full; environment rebuilt from files in the demonstration.
+          - points: 2
+            condition: At most two non-security object types Partial with a documented workaround.
+          - points: 0
+            condition: More than two object types Partial or Console-only.
+    status: draft
+    owner: procurement
+  - id: PROC-CAC-004
+    title: Drift detection of out-of-band changes
+    layer: technology
+    type: assurance
+    level: system
+    priority: must
+    statement: The offer shall demonstrate that a configuration change made outside the pipeline through a break-glass role is reported as drift between the applied and the running state within 5 minutes.
+    rationale: Without drift detection, emergency or unauthorised changes remain invisible and the Git state stops describing production.
+    source: SOL-CAC-004
+    acceptance_criteria:
+      - A change made through a break-glass role during the demonstration appears in a drift report within 5 minutes.
+      - The drift report identifies the object and the difference.
+    verification: demonstration
+    allocated_to: [C2]
+    traces:
+      satisfies: [SOL-CAC-004]
+      use_cases: [UC-07]
+    procurement:
+      kind: mandatory
+      evidence_required:
+        - Recorded demonstration of the out-of-band change and the drift report
+        - Drift report format documentation
+    status: draft
+    owner: procurement

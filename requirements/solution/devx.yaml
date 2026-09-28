@@ -1,0 +1,78 @@
+set: SOL
+area: DEVX
+requirements:
+  - id: SOL-DEVX-001
+    title: Self-service consumer onboarding realised as code
+    layer: technology
+    type: system
+    level: top_level
+    priority: must
+    statement: The solution shall realise every developer portal request to register an application or subscribe to an API as a versioned change (pull request or equivalent signed change record) that the pipeline applies after policy-based approval.
+    rationale: Self-service must still follow the no-click-ops principle, so every portal request becomes a reviewable change.
+    source: Stakeholder need — consumer self-service; docs/02 UC-03
+    acceptance_criteria:
+      - A subscription created in the portal appears as a change in the subscriptions repository with the developer as author.
+      - No portal action writes directly to the control plane or authorization server.
+      - Auto-approval rules for sandbox subscriptions are expressed as policy files.
+    verification: demonstration
+    allocated_to: [C9, C3, C4]
+    traces:
+      parents: [SOL-GOAL-003]
+      use_cases: [UC-03]
+    status: draft
+    owner: api-governance
+  - id: SOL-DEVX-002
+    title: Sandbox per API
+    layer: technology
+    type: system
+    level: system
+    priority: should
+    statement: The solution shall provide a sandbox environment for each API that applies the same policy bundle as production with mock backends.
+    rationale: Consumers need a safe place to build and test against the real security policy before touching production.
+    source: Stakeholder need — reduce onboarding incidents
+    acceptance_criteria:
+      - The sandbox for an API uses the same policy bundle version as production.
+      - The sandbox routes to mock backends and never to production backends.
+    verification: demonstration
+    allocated_to: [C9, C1, C5]
+    traces:
+      parents: [SOL-DEVX-001]
+      use_cases: [UC-03]
+    status: draft
+    owner: api-governance
+  - id: SOL-DEVX-003
+    title: Developer self-service in the portal
+    layer: technology
+    type: system
+    level: system
+    priority: must
+    statement: The developer portal shall let a verified developer discover APIs, register an application and request a subscription.
+    rationale: Consumer onboarding is the most frequent change and must not depend on the platform team.
+    source: Stakeholder need — consumer self-service; docs/02 UC-03
+    acceptance_criteria:
+      - A developer verified by the identity provider finds an API, registers an application and submits a subscription request in the portal without contacting the platform team.
+    verification: demonstration
+    allocated_to: [C9, C6]
+    traces:
+      parents: [SOL-GOAL-004]
+      use_cases: [UC-03]
+    status: draft
+    owner: api-governance
+  - id: SOL-DEVX-004
+    title: Production access gated on a recorded conformance run
+    layer: technology
+    type: system
+    level: system
+    priority: should
+    statement: The solution shall grant a consumer application production access only after a recorded conformance run covering PKCE, PAR, sender-constrained tokens and error handling has passed.
+    rationale: Consumers that cannot complete the secure flow will fail in production and generate incidents and support load.
+    source: Stakeholder need — reduce onboarding incidents
+    acceptance_criteria:
+      - Production promotion is blocked until a passing conformance report is attached to the subscription record.
+    verification: demonstration
+    allocated_to: [C9, C1, C5]
+    traces:
+      parents: [SOL-DEVX-002]
+      use_cases: [UC-03]
+    status: draft
+    owner: api-governance

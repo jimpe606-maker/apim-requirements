@@ -1,0 +1,115 @@
+set: IMPL
+area: CAC
+requirements:
+  - id: IMPL-CAC-001
+    title: Pipeline-only production changes
+    layer: process
+    type: process
+    level: top_level
+    priority: must
+    statement: Every change to a production API management environment shall be applied by the CI/CD pipeline from a merged commit on a protected branch.
+    rationale: Realises the no-click-ops principle operationally.
+    source: SOL-CAC-001
+    acceptance_criteria:
+      - Drift detection reports zero unexplained differences between Git and running state at every weekly check.
+      - Client registrations and subscriptions reach production only through pipeline runs.
+    verification: evidence
+    allocated_to: [C4, C2, ORG]
+    traces:
+      satisfies: [SOL-CAC-001, SOL-CAC-003, SOL-CAC-004, SOL-SEC-010]
+      use_cases: [UC-01, UC-02]
+    status: draft
+    owner: platform-team
+  - id: IMPL-CAC-002
+    title: Mandatory lint and policy verification stages
+    layer: process
+    type: process
+    level: system
+    priority: must
+    statement: The API delivery pipeline shall block deployment unless contract lint against the platform ruleset, policy lint and unit tests, guardrail verification of the policy bundle, and negative authorisation tests in an ephemeral environment all pass, executed in that order.
+    rationale: Turns SOL-POL-001/002 into a concrete, repeatable gate.
+    source: SOL-POL-001, SOL-POL-002, SOL-LCM-001
+    acceptance_criteria:
+      - A pull request introducing an operation without a security scheme fails the pipeline with the rule identifier in the annotation.
+      - Pipeline template is versioned in the platform repository and consumed by every team repository.
+      - Negative test set includes expired token, wrong audience, missing DPoP proof and replayed proof.
+    verification: test
+    allocated_to: [C4]
+    traces:
+      parents: [IMPL-CAC-001]
+      satisfies: [SOL-POL-001, SOL-POL-002, SOL-LCM-001, SOL-GW-001]
+      use_cases: [UC-02]
+    status: draft
+    owner: platform-team
+  - id: IMPL-CAC-003
+    title: Signed commits and code-owner approval
+    layer: process
+    type: assurance
+    level: system
+    priority: must
+    statement: Every merge to a protected branch shall require signed commits and at least one approval from a code owner.
+    rationale: Makes every change attributable and reviewed before it can reach an environment.
+    source: SOL-OBS-001
+    acceptance_criteria:
+      - Branch protection settings are exported and versioned.
+    verification: inspection
+    allocated_to: [C3, C4, C14]
+    traces:
+      satisfies: [SOL-OBS-001, SOL-CAC-001]
+      use_cases: [UC-02]
+    status: draft
+    owner: platform-team
+  - id: IMPL-CAC-004
+    title: Deployment lead time
+    layer: process
+    type: quality
+    level: system
+    priority: should
+    statement: The elapsed time from merge to a production API change being live shall not exceed 60 minutes for changes that pass all gates.
+    rationale: A measurable target that keeps the CI/CD path the path of least resistance and prevents pressure to use break-glass.
+    source: Stakeholder need — delivery speed
+    acceptance_criteria:
+      - Pipeline metrics show p90 merge-to-live under 60 minutes over a calendar month.
+    verification: analysis
+    allocated_to: [C4, ORG]
+    traces:
+      satisfies: [SOL-OPS-001]
+    status: draft
+    owner: platform-team
+  - id: IMPL-CAC-005
+    title: Console write access disabled
+    layer: process
+    type: process
+    level: system
+    priority: must
+    statement: Human write access to the control-plane console shall be disabled in all environments except through a time-boxed break-glass role.
+    rationale: The product capability (SOL-CAC-002) must be switched on and kept on; standing human write roles reintroduce click-ops.
+    source: SOL-CAC-002
+    acceptance_criteria:
+      - Quarterly access review shows zero standing human write roles in production.
+    verification: evidence
+    allocated_to: [C4, C2, ORG]
+    traces:
+      parents: [IMPL-CAC-001]
+      satisfies: [SOL-CAC-002]
+      use_cases: [UC-01, UC-02]
+    status: draft
+    owner: platform-team
+  - id: IMPL-CAC-006
+    title: Release evidence in the audit log
+    layer: process
+    type: assurance
+    level: system
+    priority: must
+    statement: Every production release shall record the commit hash, lint and policy report hashes and approver identities in the audit log.
+    rationale: Makes the change history usable as assurance evidence.
+    source: SOL-OBS-001
+    acceptance_criteria:
+      - For a sampled release, the audit record links to a retrievable lint and policy report.
+    verification: inspection
+    allocated_to: [C3, C4, C14]
+    traces:
+      satisfies: [SOL-OBS-001]
+      use_cases: [UC-02]
+    status: draft
+    owner: platform-team

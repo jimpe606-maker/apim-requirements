@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/jimpe606-maker/apim-requirements/main/schema/requirement.schema.json",
+  "title": "APIM requirement file",
+  "description": "One YAML file per (set, area). Contains a list of requirement records. Allowed values come from schema/vocab.yaml; see docs/03 for the meaning of each field.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["set", "area", "requirements"],
+  "properties": {
+    "set":  { "type": "string", "enum": ["SOL", "PROC", "IMPL"] },
+    "area": { "type": "string", "enum": ["GOAL","ARCH","GW","SEC","LCM","DEVX","CAC","POL","OBS","OPS","DATA","ORG","COM"] },
+    "requirements": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/requirement" }
+    }
+  },
+  "$defs": {
+    "id": { "type": "string", "pattern": "^(SOL|PROC|IMPL)-(GOAL|ARCH|GW|SEC|LCM|DEVX|CAC|POL|OBS|OPS|DATA|ORG|COM)-[0-9]{3}$" },
+    "requirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "layer", "type", "level", "priority", "statement", "rationale", "acceptance_criteria", "verification", "allocated_to", "traces", "status", "owner"],
+      "properties": {
+        "id":        { "$ref": "#/$defs/id" },
+        "title":     { "type": "string", "minLength": 5, "maxLength": 120 },
+        "layer":     { "type": "string", "enum": ["technology", "process", "organization"] },
+        "type":      { "type": "string", "enum": ["goal","system","quality","cybersecurity","information_security","process","organizational","assurance","regulatory","legal"], "description": "Primary requirement type." },
+        "level":     { "type": "string", "enum": ["goal","top_level","system","component"] },
+        "priority":  { "type": "string", "enum": ["must","should","could"] },
+        "statement": { "type": "string", "minLength": 20, "description": "Single sentence, active voice, uses 'shall'. Pattern: [When <trigger>,] the <subject> shall <action> [<object>] [<constraint>]." },
+        "rationale": { "type": "string", "minLength": 10, "description": "The effect the requirement is expected to achieve or contribute to." },
+        "source":    { "type": "string", "description": "The stakeholder or artefact the requirement comes from (stakeholder need, standard clause, regulation). Be as specific as possible." },
+        "acceptance_criteria": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 10 } },
+        "verification": { "type": "string", "enum": ["inspection","analysis","demonstration","test","evidence"] },
+        "allocated_to": { "type": "array", "minItems": 1, "items": { "type": "string", "pattern": "^(C[0-9]{1,2}|ORG)$" } },
+        "traces": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "parents":      { "type": "array", "items": { "$ref": "#/$defs/id" }, "description": "Parent requirement(s) in the same set, from which this requirement was obtained by decomposition or refinement. Not called derives_from because a derived requirement is, by the usual definition, one created to fill a gap rather than obtained from a parent." },
+            "satisfies":    { "type": "array", "items": { "$ref": "#/$defs/id" }, "description": "For PROC/IMPL: the SOL requirement(s) this realises or evaluates." },
+            "related":      { "type": "array", "items": { "$ref": "#/$defs/id" } },
+            "use_cases":    { "type": "array", "items": { "type": "string", "pattern": "^UC-[0-9]{2}$" } },
+            "standards":    { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "procurement": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "evidence_required"],
+          "properties": {
+            "kind": { "type": "string", "enum": ["qualification","mandatory","evaluated"] },
+            "evidence_required": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+            "scoring": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["max_points", "weight", "scale"],
+              "properties": {
+                "max_points": { "type": "integer", "minimum": 1 },
+                "weight": { "type": "number", "minimum": 0, "maximum": 1, "description": "Share of the area's total score." },
+                "scale": { "type": "array", "minItems": 2, "items": {
+                  "type": "object", "additionalProperties": false, "required": ["points","condition"],
+                  "properties": { "points": { "type": "integer", "minimum": 0 }, "condition": { "type": "string", "minLength": 5 } }
+                } }
+              }
+            }
+          }
+        },
+        "status": { "type": "string", "enum": ["draft","reviewed","approved","retired"] },
+        "owner":  { "type": "string" },
+        "tags":   { "type": "array", "items": { "type": "string" } },
+        "notes":  { "type": "string" }
+      }
+    }
+  }
+}

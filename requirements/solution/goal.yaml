@@ -1,0 +1,125 @@
+set: SOL
+area: GOAL
+requirements:
+  - id: SOL-GOAL-001
+    title: Zero-trust access to every API
+    layer: technology
+    type: goal
+    level: goal
+    priority: must
+    statement: The solution shall authenticate, authorise and sender-constrain every API call individually, granting no trust on the basis of network location.
+    rationale: Zero trust is the primary security objective of the platform; every access-control requirement in the baseline refines it.
+    source: docs/01 design principles 1 and 2; NIST SP 800-207
+    acceptance_criteria:
+      - No API in the registry accepts a request without a valid, sender-constrained access token, except through a documented policy exception recorded as code.
+    verification: analysis
+    allocated_to: [C1, C5, C6, C15]
+    traces:
+      use_cases: [UC-04, UC-05]
+      standards: [NIST SP 800-207]
+    status: draft
+    owner: security-architecture
+  - id: SOL-GOAL-002
+    title: Data exposure limited to contract, classification and entitlement
+    layer: technology
+    type: goal
+    level: goal
+    priority: must
+    statement: The solution shall expose personal and classified data only to the extent that the API contract, the data classification and the caller's entitlements and consent allow.
+    rationale: Data protection obligations apply to every API that handles personal or classified data, independent of which team built it.
+    source: GDPR Art. 5 and 25; stakeholder need — data protection
+    acceptance_criteria:
+      - Sampled responses and logs for each classification contain no field beyond what the contract and the applicable policy permit.
+    verification: analysis
+    allocated_to: [C1, C7, C14]
+    traces:
+      use_cases: [UC-05]
+      standards: [GDPR]
+    status: draft
+    owner: data-protection
+  - id: SOL-GOAL-003
+    title: Every change made as reviewed code
+    layer: process
+    type: goal
+    level: goal
+    priority: must
+    statement: The solution shall make every change to APIs, policies, credentials and subscriptions a versioned, reviewed change that a pipeline applies.
+    rationale: Configuration as code makes every change reviewable, reproducible and attributable, and removes click-ops as a source of error and attack.
+    source: docs/01 design principle 3
+    acceptance_criteria:
+      - The audit log for a sampled quarter shows no configuration change without a corresponding merged change record, other than reconciled break-glass actions.
+    verification: analysis
+    allocated_to: [C2, C3, C4]
+    traces:
+      use_cases: [UC-01, UC-02, UC-03, UC-06]
+    status: draft
+    owner: platform-architecture
+  - id: SOL-GOAL-004
+    title: Contract-first, self-service API lifecycle
+    layer: technology
+    type: goal
+    level: goal
+    priority: must
+    statement: The solution shall use the API contract as the single definition from which each API is built, enforced, documented and offered to consumers.
+    rationale: A single contract prevents drift between what is documented, what is enforced and what consumers subscribe to.
+    source: docs/01 design principle 4
+    acceptance_criteria:
+      - For a sampled API, routing, validation, documentation and the portal entry all derive from the same contract version.
+    verification: analysis
+    allocated_to: [C2, C1, C9]
+    traces:
+      use_cases: [UC-02, UC-03]
+      standards: [OpenAPI 3.x]
+    status: draft
+    owner: api-governance
+  - id: SOL-GOAL-005
+    title: Uninterrupted API service through change and failure
+    layer: technology
+    type: goal
+    level: goal
+    priority: must
+    statement: The solution shall keep serving API traffic through control-plane outages, configuration changes, software upgrades and credential rotations.
+    rationale: Frequent automated change is only acceptable if it does not interrupt consumers.
+    source: docs/01 design principle 5; stakeholder need — continuous deployment
+    acceptance_criteria:
+      - Gateway availability over a quarter shows no outage caused by a control-plane outage, a deployment, an upgrade or a credential rotation.
+    verification: analysis
+    allocated_to: [C1, C2, C11, C12]
+    traces:
+      use_cases: [UC-02, UC-07]
+    status: draft
+    owner: platform-operations
+  - id: SOL-GOAL-006
+    title: Accountable and observable operation
+    layer: technology
+    type: goal
+    level: goal
+    priority: must
+    statement: The solution shall make every configuration change and every access decision attributable to an identity and observable end to end.
+    rationale: Accountability is required for incident response, audit and non-repudiation.
+    source: ISO/IEC 27001; stakeholder need — auditability
+    acceptance_criteria:
+      - For a sampled request and a sampled configuration change, the actor, the decision and the path can be reconstructed from audit and telemetry data.
+    verification: analysis
+    allocated_to: [C14, C1, C2]
+    traces:
+      use_cases: [UC-05, UC-07]
+      standards: [ISO/IEC 27001]
+    status: draft
+    owner: security-architecture
+  - id: SOL-GOAL-007
+    title: Independence from any single vendor
+    layer: process
+    type: goal
+    level: goal
+    priority: must
+    statement: The solution shall allow the buyer to replace any product in the solution without losing configuration, audit records or telemetry.
+    rationale: The buyer must be able to change supplier at the end of a contract without rebuilding the platform from scratch.
+    source: Stakeholder need — exit and portability
+    acceptance_criteria:
+      - The exit plan demonstrates export of configuration, audit records and telemetry in documented, open formats.
+    verification: analysis
+    allocated_to: [C2, C14, ORG]
+    traces: {}
+    status: draft
+    owner: platform-architecture

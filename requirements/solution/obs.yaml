@@ -1,0 +1,42 @@
+set: SOL
+area: OBS
+requirements:
+  - id: SOL-OBS-001
+    title: Tamper-evident audit log of configuration and access
+    layer: technology
+    type: information_security
+    level: top_level
+    priority: must
+    statement: The solution shall write an append-only, tamper-evident audit record for every configuration change, approval, credential event and API access decision, including actor identity, commit or request identifier and timestamp.
+    rationale: Non-repudiation and forensic capability are prerequisites for zero trust and for assurance towards auditors.
+    source: ISO/IEC 27001 A.8.15; stakeholder need — auditability
+    acceptance_criteria:
+      - Modification of an existing audit record is detectable via hash chaining or an external immutable store.
+      - Access decisions include client_id, subject identifier (pseudonymised), scopes, decision and policy version.
+      - Audit records can be exported in a documented structured format.
+    verification: test
+    allocated_to: [C14, C2, C5, C1]
+    traces:
+      parents: [SOL-GOAL-006]
+      use_cases: [UC-01, UC-02, UC-03, UC-05, UC-06, UC-07]
+    status: draft
+    owner: security-architecture
+  - id: SOL-OBS-002
+    title: Open-standard telemetry
+    layer: technology
+    type: system
+    level: system
+    priority: should
+    statement: The solution shall emit metrics, traces and logs using OpenTelemetry with a correlation identifier propagated from the gateway to backends.
+    rationale: Avoids observability vendor lock-in and enables end-to-end tracing.
+    source: OpenTelemetry specification
+    acceptance_criteria:
+      - A trace started at the gateway is visible end to end in the buyer's tracing backend.
+    verification: demonstration
+    allocated_to: [C1, C14]
+    traces:
+      parents: [SOL-GOAL-006, SOL-GOAL-007]
+      use_cases: [UC-05]
+      standards: [OpenTelemetry]
+    status: draft
+    owner: platform-operations

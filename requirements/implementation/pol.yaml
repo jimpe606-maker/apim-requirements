@@ -1,0 +1,40 @@
+set: IMPL
+area: POL
+requirements:
+  - id: IMPL-POL-001
+    title: Platform guardrail ruleset owned by security
+    layer: process
+    type: process
+    level: system
+    priority: must
+    statement: The security function shall own and version the platform guardrail policies and the contract lint ruleset in a dedicated repository where every change requires approval from security and from the platform team.
+    rationale: Guardrails are the technical expression of security policy and need a clear owner.
+    source: SOL-POL-002
+    acceptance_criteria:
+      - CODEOWNERS for the guardrail repository names the security group.
+      - Ruleset has a changelog and each rule references the SOL requirement it enforces.
+    verification: inspection
+    allocated_to: [C3, ORG]
+    traces:
+      satisfies: [SOL-POL-002, SOL-POL-001]
+      use_cases: [UC-06]
+    status: draft
+    owner: security-team
+  - id: IMPL-POL-002
+    title: Policy change review with impact analysis
+    layer: process
+    type: process
+    level: system
+    priority: should
+    statement: When a policy change affects APIs owned by other teams, the pipeline shall request approval from each affected API owner based on the impact report before the change can be merged.
+    rationale: Prevents central changes from silently breaking consumers.
+    source: SOL-POL-003
+    acceptance_criteria:
+      - A test policy change affecting two teams produces review requests to both code-owner groups.
+    verification: test
+    allocated_to: [C4, C3]
+    traces:
+      satisfies: [SOL-POL-003]
+      use_cases: [UC-06]
+    status: draft
+    owner: security-team

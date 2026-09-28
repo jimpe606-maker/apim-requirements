@@ -1,0 +1,61 @@
+set: IMPL
+area: LCM
+requirements:
+  - id: IMPL-LCM-001
+    title: Deprecation declared in the contract with minimum notice
+    layer: process
+    type: process
+    level: system
+    priority: should
+    statement: API provider teams shall declare each deprecation in the API contract with a migration target and a sunset date at least 6 months after the deprecation date.
+    rationale: A fixed notice period makes deprecation predictable for consumers and removes per-team negotiation.
+    source: SOL-LCM-003
+    acceptance_criteria:
+      - The pipeline rejects a deprecation with a sunset date less than 6 months after the deprecation date or without a migration target.
+      - Requests to a version after its sunset date are answered with HTTP 410 Gone.
+    verification: test
+    allocated_to: [C4, C1, C9]
+    traces:
+      satisfies: [SOL-LCM-003, SOL-LCM-005]
+      use_cases: [UC-07]
+      standards: [RFC 8594, RFC 9745]
+    status: draft
+    owner: api-governance
+  - id: IMPL-LCM-002
+    title: Breaking changes only as a new major version
+    layer: process
+    type: process
+    level: system
+    priority: should
+    statement: The pipeline shall reject a contract change classified as breaking unless it is deployed as a new major version alongside the current one.
+    rationale: Consumers must never receive a breaking change on a version they already use.
+    source: SOL-LCM-004, SOL-LCM-002
+    acceptance_criteria:
+      - A pull request that removes a required response property from an existing major version fails the pipeline.
+      - The same change submitted as a new major version passes, with both versions routable.
+    verification: test
+    allocated_to: [C4, C2]
+    traces:
+      satisfies: [SOL-LCM-004, SOL-LCM-002]
+      use_cases: [UC-02]
+    status: draft
+    owner: api-governance
+  - id: IMPL-LCM-003
+    title: Subscribed consumers notified of deprecation
+    layer: process
+    type: process
+    level: system
+    priority: should
+    statement: The pipeline shall notify every subscribed consumer's registered contact when a deprecation is deployed.
+    rationale: Headers and portal entries reach consumers only when they look; a direct notice makes the migration window start for everyone.
+    source: SOL-LCM-003
+    acceptance_criteria:
+      - Every subscribed consumer's registered contact receives a notification when the deprecation is deployed.
+    verification: test
+    allocated_to: [C4, C9]
+    traces:
+      satisfies: [SOL-LCM-003, SOL-LCM-005]
+      use_cases: [UC-07]
+      standards: [RFC 8594, RFC 9745]
+    status: draft
+    owner: api-governance

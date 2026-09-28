@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use this baseline, please cite it as below."
+title: "APIM Requirements: an open requirements-as-code baseline for API management"
+type: dataset
+authors:
+  - name: "The apim-requirements contributors"
+version: 0.1.0-alpha.1
+repository-code: "https://github.com/jimpe606-maker/apim-requirements"
+license:
+  - CC0-1.0
+  - MIT
+keywords:
+  - requirements engineering
+  - API management
+  - zero trust
+  - OAuth 2.1
+  - FAPI 2.0
+  - configuration as code
+  - procurement

@@ -1,0 +1,65 @@
+set: PROC
+area: DEVX
+requirements:
+  - id: PROC-DEVX-001
+    title: Portal subscriptions realised as pipeline-applied changes
+    layer: technology
+    type: assurance
+    level: system
+    priority: must
+    statement: The offer shall demonstrate that an application registration and a subscription request made in the developer portal each result in a versioned change record that only the buyer's pipeline applies to the control plane and authorization server.
+    rationale: A portal that writes directly to the control plane reintroduces click-ops for the most frequent change type, which the configuration-as-code principle forbids.
+    source: SOL-DEVX-001
+    acceptance_criteria:
+      - The registration and the subscription each appear as a change in the buyer's repository with the developer as author.
+      - Audit records show no portal identity writing directly to the control plane or authorization server.
+      - Sandbox auto-approval is expressed as a policy file in the repository.
+    verification: demonstration
+    allocated_to: [C9, C3, C4]
+    traces:
+      satisfies: [SOL-DEVX-001, SOL-DEVX-003]
+      use_cases: [UC-03]
+    procurement:
+      kind: mandatory
+      evidence_required:
+        - Recorded demonstration of the portal flow
+        - Resulting change records and pipeline run log
+        - Control-plane audit log for the demonstration period
+    status: draft
+    owner: procurement
+  - id: PROC-DEVX-002
+    title: Sandbox and conformance gating
+    layer: technology
+    type: assurance
+    level: system
+    priority: should
+    statement: The offer shall be scored on native support for a per-API sandbox that applies the production policy bundle and for gating production access on a recorded consumer conformance run.
+    rationale: Sandbox and conformance gating reduce onboarding incidents, and products range from native support to buyer-built tooling.
+    source: SOL-DEVX-002, SOL-DEVX-004
+    acceptance_criteria:
+      - The demonstration shows a sandbox created for a sample API with the production policy bundle.
+      - The demonstration shows production access blocked until a conformance report is recorded.
+    verification: demonstration
+    allocated_to: [C9, C1, C4]
+    traces:
+      satisfies: [SOL-DEVX-002, SOL-DEVX-004]
+      use_cases: [UC-03]
+    procurement:
+      kind: evaluated
+      evidence_required:
+        - Recorded demonstration of sandbox creation and conformance gating
+        - Product documentation for the sandbox and conformance features
+      scoring:
+        max_points: 5
+        weight: 1.0
+        scale:
+          - points: 5
+            condition: Per-API sandbox with the production policy bundle and conformance gating both native and configured as code.
+          - points: 3
+            condition: Sandbox native; conformance gating requires buyer-built integration.
+          - points: 1
+            condition: Sandbox available only with separately maintained policy configuration.
+          - points: 0
+            condition: No sandbox capability.
+    status: draft
+    owner: procurement

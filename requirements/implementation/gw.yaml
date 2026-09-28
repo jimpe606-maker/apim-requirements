@@ -1,0 +1,80 @@
+set: IMPL
+area: GW
+requirements:
+  - id: IMPL-GW-001
+    title: Enforcement policy generated from the contract by the pipeline
+    layer: process
+    type: process
+    level: system
+    priority: must
+    statement: The pipeline shall generate request and response validation, size limits and header allow-lists from the API contract for every deployment.
+    rationale: Deriving enforcement from the contract keeps the contract as the security boundary and removes hand-written, drifting gateway rules.
+    source: SOL-GW-002
+    acceptance_criteria:
+      - Deploying an API whose gateway configuration differs from the configuration generated from its contract fails the pipeline.
+      - The post-deployment smoke test sends one schema-violating request per API and asserts HTTP 400.
+    verification: test
+    allocated_to: [C4, C1, C13]
+    traces:
+      satisfies: [SOL-GW-002, SOL-GW-004]
+      use_cases: [UC-02, UC-05]
+      standards: [OpenAPI 3.x, OWASP API Security Top 10]
+    status: draft
+    owner: api-governance
+  - id: IMPL-GW-002
+    title: Authorisation policies versioned with obligation tests
+    layer: process
+    type: process
+    level: system
+    priority: should
+    statement: API provider teams shall keep the authorisation policies for their APIs in Git with a unit test for each obligation the policy can return.
+    rationale: Externalised authorisation moves risk into policy code, so that code needs the same review and test discipline as the API contract.
+    source: SOL-GW-003
+    acceptance_criteria:
+      - Each API with externalised authorisation has a policy test suite that runs in the pipeline.
+      - Each obligation type returned by a policy is covered by at least one unit test.
+    verification: test
+    allocated_to: [C3, C4, C7]
+    traces:
+      satisfies: [SOL-GW-003, SOL-GW-005, SOL-POL-001]
+      use_cases: [UC-06]
+    status: draft
+    owner: api-governance
+  - id: IMPL-GW-003
+    title: Rate-limit policy required on every API deployment
+    layer: process
+    type: process
+    level: system
+    priority: must
+    statement: The pipeline shall reject any API deployment that lacks a rate-limit policy.
+    rationale: An API without a rate limit is exposed to abuse and resource exhaustion from its first request.
+    source: SOL-GW-002
+    acceptance_criteria:
+      - Deploying an API without a rate-limit policy fails the guardrail stage with a message naming the missing policy.
+    verification: test
+    allocated_to: [C4, C1, C13]
+    traces:
+      satisfies: [SOL-GW-004, SOL-POL-002]
+      use_cases: [UC-02]
+      standards: [OWASP API Security Top 10]
+    status: draft
+    owner: api-governance
+  - id: IMPL-GW-004
+    title: Fail-closed guardrail for authorisation policy bundles
+    layer: process
+    type: process
+    level: system
+    priority: should
+    statement: The pipeline shall reject any authorisation policy bundle that lacks a deny default or allows cached decisions without a bounded TTL.
+    rationale: A policy bundle that fails open turns a decision-point outage into unauthorised access.
+    source: SOL-GW-003
+    acceptance_criteria:
+      - A policy bundle without a deny default fails the pipeline.
+      - A policy that allows cached decisions without a TTL fails the pipeline.
+    verification: test
+    allocated_to: [C4, C7]
+    traces:
+      satisfies: [SOL-GW-003, SOL-POL-002]
+      use_cases: [UC-06]
+    status: draft
+    owner: api-governance

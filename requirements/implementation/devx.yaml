@@ -1,0 +1,41 @@
+set: IMPL
+area: DEVX
+requirements:
+  - id: IMPL-DEVX-001
+    title: Every production API published in the portal catalogue
+    layer: process
+    type: process
+    level: system
+    priority: must
+    statement: Every production API shall be published in the developer portal catalogue, with its contract, documentation and subscription plans, before it accepts production traffic.
+    rationale: Self-service only works if the catalogue is complete; an API missing from the portal forces consumers to ask the platform team.
+    source: SOL-DEVX-003
+    acceptance_criteria:
+      - The production deployment pipeline fails when the API has no portal catalogue entry.
+      - A monthly comparison of gateway routes and portal entries shows no production API missing from the portal.
+    verification: test
+    allocated_to: [C9, C4]
+    traces:
+      satisfies: [SOL-DEVX-003]
+      use_cases: [UC-02, UC-03]
+    status: draft
+    owner: api-governance
+  - id: IMPL-DEVX-002
+    title: Sandbox provisioned with every API
+    layer: process
+    type: process
+    level: system
+    priority: should
+    statement: The platform pipeline shall provision the sandbox for an API from the same policy bundle version as its production deployment.
+    rationale: A sandbox that drifts from production policy lets consumers pass conformance and still fail in production.
+    source: SOL-DEVX-002
+    acceptance_criteria:
+      - For every API in production, a sandbox exists that uses the same policy bundle version.
+      - A policy change deployed to production is deployed to the sandbox in the same pipeline run.
+    verification: test
+    allocated_to: [C4, C1, C9]
+    traces:
+      satisfies: [SOL-DEVX-002]
+      use_cases: [UC-03]
+    status: draft
+    owner: platform-operations

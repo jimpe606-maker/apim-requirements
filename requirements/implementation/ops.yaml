@@ -1,0 +1,40 @@
+set: IMPL
+area: OPS
+requirements:
+  - id: IMPL-OPS-001
+    title: Automated rotation drills
+    layer: process
+    type: process
+    level: system
+    priority: should
+    statement: The platform team shall execute an automated signing-key and certificate rotation in production at least every 90 days, with the result recorded in the audit log.
+    rationale: Rotation that is never exercised fails when it is finally needed.
+    source: SOL-OPS-002, SOL-SEC-005
+    acceptance_criteria:
+      - Audit log contains a rotation event per 90-day window with zero validation failures during overlap.
+    verification: evidence
+    allocated_to: [C11, C12, C5, ORG]
+    traces:
+      satisfies: [SOL-OPS-002, SOL-SEC-005]
+      use_cases: [UC-07]
+    status: draft
+    owner: platform-operations
+  - id: IMPL-OPS-002
+    title: Automation-failure alerts routed to on-call with a runbook
+    layer: process
+    type: process
+    level: system
+    priority: must
+    statement: The operations team shall route certificate and key automation failure alerts to the on-call rota with a linked runbook.
+    rationale: An alert without an owner or a runbook does not prevent the outage it warns about.
+    source: SOL-OPS-003
+    acceptance_criteria:
+      - A deliberately failed renewal in pre-production pages the on-call engineer within 15 minutes.
+      - Each alert links to a runbook in the platform repository.
+    verification: demonstration
+    allocated_to: [C14, ORG]
+    traces:
+      satisfies: [SOL-OPS-003]
+      use_cases: [UC-07]
+    status: draft
+    owner: platform-operations

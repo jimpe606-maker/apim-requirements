@@ -1,0 +1,79 @@
+set: SOL
+area: CAC
+requirements:
+  - id: SOL-CAC-001
+    title: All configuration as versioned text artefacts applied through an API
+    layer: technology
+    type: system
+    level: top_level
+    priority: must
+    statement: The solution shall expose 100 % of its configuration (APIs, routes, policies, plans, clients, subscriptions, environments, tenants and portal content) as declarative, diff-able text artefacts that can be applied idempotently through a documented API or CLI without console interaction.
+    rationale: Configuration as code is the foundation for review, audit, reproducibility and automated verification; any console-only capability breaks the chain.
+    source: Stakeholder need — no click-ops
+    acceptance_criteria:
+      - The complete configuration of a production environment can be exported, deleted and re-applied from files with identical resulting behaviour.
+      - The vendor provides a machine-readable schema for every configuration artefact.
+      - No supported feature requires a console action to reach production.
+    verification: demonstration
+    allocated_to: [C2, C4, C10]
+    traces:
+      parents: [SOL-GOAL-003]
+      use_cases: [UC-01, UC-02, UC-03]
+    status: draft
+    owner: platform-architecture
+  - id: SOL-CAC-002
+    title: Read-only console and pipeline-only write path
+    layer: technology
+    type: cybersecurity
+    level: system
+    priority: must
+    statement: The solution shall support a role model in which human users have read-only access to the control plane and only designated pipeline identities, authenticated with workload credentials, can apply changes.
+    rationale: Enforces the no-click-ops principle technically rather than by policy alone.
+    source: Stakeholder need — no click-ops
+    acceptance_criteria:
+      - A user with the highest human role cannot create or modify an API in the console.
+      - A pipeline identity is scoped to a tenant and environment and cannot change other tenants.
+    verification: test
+    allocated_to: [C2, C4]
+    traces:
+      parents: [SOL-CAC-001]
+      use_cases: [UC-01]
+    status: draft
+    owner: platform-architecture
+  - id: SOL-CAC-003
+    title: Environment promotion of immutable artefacts
+    layer: technology
+    type: system
+    level: system
+    priority: must
+    statement: The solution shall allow the same configuration artefact to be promoted through environments using environment overlays only.
+    rationale: Identical artefacts across environments make test evidence valid for production.
+    source: GitOps principles
+    acceptance_criteria:
+      - Promotion from test to production changes only overlay values (hostnames, secrets references, quotas).
+    verification: test
+    allocated_to: [C2, C4]
+    traces:
+      parents: [SOL-CAC-001]
+      use_cases: [UC-02, UC-03]
+    status: draft
+    owner: platform-architecture
+  - id: SOL-CAC-004
+    title: Configuration drift detection
+    layer: technology
+    type: system
+    level: system
+    priority: must
+    statement: The solution shall report configuration drift between the applied state and the running state.
+    rationale: Drift detection catches out-of-band change, including break-glass actions that were never reconciled.
+    source: GitOps principles
+    acceptance_criteria:
+      - A manual change (via break-glass) is reported as drift within 5 minutes.
+      - Each drift report identifies the object, the difference and the time of detection.
+    verification: test
+    allocated_to: [C2, C4]
+    traces:
+      parents: [SOL-CAC-001]
+      use_cases: [UC-02, UC-07]
+    status: draft
+    owner: platform-architecture

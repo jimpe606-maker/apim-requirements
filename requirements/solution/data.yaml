@@ -1,0 +1,81 @@
+set: SOL
+area: DATA
+requirements:
+  - id: SOL-DATA-001
+    title: Consent recorded per scope and purpose
+    layer: technology
+    type: information_security
+    level: system
+    priority: should
+    statement: The solution shall record end-user consent per scope and purpose at authorisation time.
+    rationale: Data-access APIs handling personal data need demonstrable consent under GDPR.
+    source: GDPR Art. 6, 7; stakeholder need — consent management
+    acceptance_criteria:
+      - Consent records include timestamp, scopes, purpose text version and client_id.
+    verification: test
+    allocated_to: [C5, C8]
+    traces:
+      parents: [SOL-GOAL-002]
+      use_cases: [UC-04]
+      standards: [GDPR]
+    status: draft
+    owner: data-protection
+  - id: SOL-DATA-002
+    title: Data classification required for every API contract
+    layer: technology
+    type: information_security
+    level: system
+    priority: must
+    statement: The solution shall require a data classification for every API contract.
+    rationale: Classification is the input for masking, security-profile selection and retention; without it those controls cannot be applied automatically.
+    source: ISO/IEC 27001 A.5.12; GDPR Art. 25
+    acceptance_criteria:
+      - A contract without a classification annotation is rejected at deployment.
+      - The classification of each deployed API is available to gateway, logging and analytics policies.
+    verification: test
+    allocated_to: [C2, C4]
+    traces:
+      parents: [SOL-GOAL-002]
+      use_cases: [UC-02, UC-05]
+      standards: [GDPR]
+    status: draft
+    owner: data-protection
+  - id: SOL-DATA-003
+    title: Masking of classified fields in responses and logs
+    layer: technology
+    type: information_security
+    level: system
+    priority: must
+    statement: The solution shall mask or remove classified fields in responses, logs and analytics exports according to the policy for their classification.
+    rationale: Prevents personal or secret data from leaking through logs, analytics or over-broad responses.
+    source: ISO/IEC 27001 A.5.12; GDPR Art. 25
+    acceptance_criteria:
+      - Fields marked as personal data are absent from access logs and analytics exports.
+      - A response field classified as confidential is masked for clients without the entitlement defined in policy.
+    verification: test
+    allocated_to: [C1, C14]
+    traces:
+      parents: [SOL-GOAL-002]
+      use_cases: [UC-02, UC-05]
+      standards: [GDPR]
+    status: draft
+    owner: data-protection
+  - id: SOL-DATA-004
+    title: Consent state enforced per request
+    layer: technology
+    type: information_security
+    level: system
+    priority: should
+    statement: The solution shall make the current consent state available to the policy decision point so that every API request is authorised against it.
+    rationale: Recorded consent only protects the data subject if withdrawal takes effect on the next request.
+    source: GDPR Art. 6, 7; stakeholder need — consent management
+    acceptance_criteria:
+      - Revoking consent causes subsequent API requests for that scope to be denied within 60 seconds.
+    verification: test
+    allocated_to: [C8, C7, C1]
+    traces:
+      parents: [SOL-DATA-001]
+      use_cases: [UC-05]
+      standards: [GDPR]
+    status: draft
+    owner: data-protection

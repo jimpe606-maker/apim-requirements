@@ -1,0 +1,97 @@
+set: SOL
+area: LCM
+requirements:
+  - id: SOL-LCM-001
+    title: Contract-first API definition
+    layer: technology
+    type: system
+    level: top_level
+    priority: must
+    statement: The solution shall derive routing, request and response validation, security requirements and portal documentation from an OpenAPI 3.x document, or an AsyncAPI 2.x or 3.x document for event APIs, as the primary definition of an API.
+    rationale: The contract is the single artefact that can be linted, reviewed, versioned and tested; deriving everything else from it prevents drift.
+    source: Stakeholder need — contract-first governance
+    acceptance_criteria:
+      - Importing an OpenAPI document creates routes, validation rules and documentation with no manual editing.
+      - The deployed behaviour is regenerated when the contract changes and the difference is visible in the pipeline.
+    verification: demonstration
+    allocated_to: [C2, C1, C9]
+    traces:
+      parents: [SOL-GOAL-004]
+      use_cases: [UC-02]
+      standards: [OpenAPI 3.x, AsyncAPI]
+    status: draft
+    owner: api-governance
+  - id: SOL-LCM-002
+    title: Concurrent major versions
+    layer: technology
+    type: system
+    level: system
+    priority: should
+    statement: The solution shall support concurrent deployment of multiple major versions of an API, each with its own policies.
+    rationale: Consumers need a predictable migration window, which requires the old and new major version to run side by side.
+    source: API governance policy
+    acceptance_criteria:
+      - Two major versions of an API are routable simultaneously with independent policies.
+    verification: test
+    allocated_to: [C2, C4]
+    traces:
+      parents: [SOL-LCM-001]
+      use_cases: [UC-02]
+    status: draft
+    owner: api-governance
+  - id: SOL-LCM-003
+    title: Deprecation and Sunset headers at the gateway
+    layer: technology
+    type: system
+    level: component
+    priority: should
+    statement: When an API version is marked deprecated, the gateway shall add Deprecation and Sunset headers to its responses.
+    rationale: Mechanised deprecation reduces surprise outages for consumers.
+    source: IETF Deprecation HTTP header (RFC 9745) and Sunset header (RFC 8594)
+    acceptance_criteria:
+      - Responses from a deprecated version include Deprecation and Sunset headers with correct dates.
+    verification: test
+    allocated_to: [C1]
+    traces:
+      parents: [SOL-LCM-002]
+      use_cases: [UC-07]
+      standards: [RFC 8594, RFC 9745]
+    status: draft
+    owner: api-governance
+  - id: SOL-LCM-004
+    title: Breaking-change classification of contract changes
+    layer: technology
+    type: system
+    level: system
+    priority: should
+    statement: The solution shall classify every change to an API contract as breaking or non-breaking.
+    rationale: The classification decides whether a change needs a new major version and a migration window, and feeds the pipeline gate.
+    source: API governance policy
+    acceptance_criteria:
+      - Removing a required response property is reported as breaking.
+      - Adding an optional response property is reported as non-breaking.
+    verification: test
+    allocated_to: [C4, C2]
+    traces:
+      parents: [SOL-LCM-001]
+      use_cases: [UC-02]
+    status: draft
+    owner: api-governance
+  - id: SOL-LCM-005
+    title: Sunset date and migration target shown in the portal
+    layer: technology
+    type: system
+    level: component
+    priority: should
+    statement: When an API version is marked deprecated, the developer portal shall show its sunset date and migration target.
+    rationale: Mechanised deprecation reduces surprise outages for consumers.
+    source: IETF Deprecation HTTP header (RFC 9745) and Sunset header (RFC 8594)
+    acceptance_criteria:
+      - The portal entry displays the sunset date and migration target within 5 minutes of the change being deployed.
+    verification: test
+    allocated_to: [C9]
+    traces:
+      parents: [SOL-LCM-002]
+      use_cases: [UC-07]
+    status: draft
+    owner: api-governance

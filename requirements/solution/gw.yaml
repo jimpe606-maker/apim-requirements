@@ -1,0 +1,103 @@
+set: SOL
+area: GW
+requirements:
+  - id: SOL-GW-001
+    title: Per-request token validation with sender constraint
+    layer: technology
+    type: cybersecurity
+    level: system
+    priority: must
+    statement: When a request arrives for a protected API, the gateway shall forward it only after validating the access token (signature, issuer, audience, expiry and scope) and its sender constraint (DPoP proof per RFC 9449 or mTLS certificate binding per RFC 8705).
+    rationale: Bearer tokens alone can be replayed if stolen; proof-of-possession is the core zero-trust control at the edge.
+    source: FAPI 2.0 Security Profile §5.3; OAuth 2.1
+    acceptance_criteria:
+      - A replayed DPoP proof (same jti) is rejected with HTTP 401 and error invalid_dpop_proof.
+      - A valid token presented over a TLS session whose client certificate thumbprint does not match cnf.x5t#S256 is rejected with HTTP 401.
+      - A token whose aud does not include the called API is rejected with HTTP 401.
+      - Validation uses cached JWKS with rotation support and does not add more than 5 ms p95 latency.
+    verification: test
+    allocated_to: [C1]
+    traces:
+      parents: [SOL-GOAL-001]
+      use_cases: [UC-05]
+      standards: [RFC 9449, RFC 8705, RFC 9068, RFC 7519]
+    status: draft
+    owner: security-architecture
+  - id: SOL-GW-002
+    title: Contract enforcement at the gateway
+    layer: technology
+    type: cybersecurity
+    level: system
+    priority: must
+    statement: The gateway shall validate requests and responses against the deployed API contract (OpenAPI schema, content type, size limits).
+    rationale: Contract enforcement at the edge removes a class of injection and data-leak defects and makes the contract the security boundary.
+    source: OWASP API Security Top 10
+    acceptance_criteria:
+      - A request body violating the OpenAPI schema is rejected with HTTP 400 before reaching the backend.
+      - A response containing a property not declared in the contract is blocked or masked according to policy.
+    verification: test
+    allocated_to: [C1, C13]
+    traces:
+      parents: [SOL-GOAL-002, SOL-LCM-001]
+      use_cases: [UC-05]
+      standards: [OpenAPI 3.x, OWASP API Security Top 10]
+    status: draft
+    owner: security-architecture
+  - id: SOL-GW-003
+    title: Externalised fine-grained authorisation
+    layer: technology
+    type: system
+    level: system
+    priority: should
+    statement: The gateway shall delegate per-request authorisation decisions to an external policy decision point when the API's policy requires it.
+    rationale: Moves business authorisation out of each backend and into versioned policy-as-code.
+    source: Zero-trust reference architecture (docs/01)
+    acceptance_criteria:
+      - A policy change in the policy decision point alters gateway behaviour without redeploying the API.
+      - If the policy decision point is unavailable, the gateway denies the request unless a policy explicitly allows cached decisions for a bounded TTL.
+    verification: test
+    allocated_to: [C1, C7, C8]
+    traces:
+      parents: [SOL-GOAL-001]
+      use_cases: [UC-05, UC-06]
+    status: draft
+    owner: security-architecture
+  - id: SOL-GW-004
+    title: Rate limiting and header allow-lists per client and API
+    layer: technology
+    type: cybersecurity
+    level: system
+    priority: must
+    statement: The gateway shall apply rate limiting and header allow-lists per client and per API.
+    rationale: Per-client limits contain abuse and resource exhaustion, and header allow-lists stop header-based injection and smuggling.
+    source: OWASP API Security Top 10
+    acceptance_criteria:
+      - Rate limits are configurable per client and per plan and return HTTP 429 with Retry-After.
+      - A request header not on the allow-list is rejected or removed before the request reaches the backend.
+    verification: test
+    allocated_to: [C1, C13]
+    traces:
+      parents: [SOL-GOAL-005]
+      use_cases: [UC-05]
+      standards: [OWASP API Security Top 10]
+    status: draft
+    owner: security-architecture
+  - id: SOL-GW-005
+    title: Enforcement of authorisation obligations
+    layer: technology
+    type: system
+    level: component
+    priority: should
+    statement: The gateway shall enforce the obligations returned with an authorisation decision, including field masking and row filtering.
+    rationale: Fine-grained authorisation often needs more than permit or deny; obligations let the policy limit what a permitted caller receives.
+    source: Zero-trust reference architecture (docs/01)
+    acceptance_criteria:
+      - A masking obligation returned by the policy decision point removes or masks the named field in the response.
+      - A row-filtering obligation limits a returned collection to the permitted items.
+    verification: test
+    allocated_to: [C1, C7, C8]
+    traces:
+      parents: [SOL-GW-003]
+      use_cases: [UC-05]
+    status: draft
+    owner: security-architecture

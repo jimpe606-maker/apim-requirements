@@ -1,0 +1,51 @@
+set: PROC
+area: OPS
+requirements:
+  - id: PROC-OPS-001
+    title: Zero-downtime configuration change and rolling upgrade under load
+    layer: technology
+    type: assurance
+    level: system
+    priority: must
+    statement: The offer shall pass the buyer's load test, in which a configuration change and a rolling gateway software upgrade applied under sustained traffic produce zero failed requests attributable to the change.
+    rationale: Continuous deployment is only viable if every change is non-disruptive, and vendor claims of zero downtime vary in what they include.
+    source: SOL-OPS-001
+    acceptance_criteria:
+      - The load generator records zero non-2xx responses and zero connection resets attributable to the configuration change.
+      - The load generator records zero non-2xx responses and zero connection resets attributable to the rolling upgrade.
+    verification: test
+    allocated_to: [C1, C2]
+    traces:
+      satisfies: [SOL-OPS-001]
+      use_cases: [UC-02]
+    procurement:
+      kind: mandatory
+      evidence_required:
+        - Load test report with request-level results
+        - Upgrade procedure documentation for the offered version
+    status: draft
+    owner: procurement
+  - id: PROC-OPS-002
+    title: Automated certificate and key renewal with failure alerting
+    layer: technology
+    type: assurance
+    level: system
+    priority: must
+    statement: The offer shall demonstrate automatic renewal of TLS certificates, workload identities and token signing keys before expiry, including an alert raised within 15 minutes of a deliberately failed renewal.
+    rationale: Manual certificate handling is the most common cause of avoidable outages, and silent renewal failures are as harmful as no automation.
+    source: SOL-OPS-002
+    acceptance_criteria:
+      - Certificates and keys configured with short test lifetimes are renewed without manual action and without dropped requests.
+      - A renewal made to fail by the evaluator produces an alert within 15 minutes.
+    verification: demonstration
+    allocated_to: [C11, C12, C5]
+    traces:
+      satisfies: [SOL-OPS-002, SOL-OPS-003]
+      use_cases: [UC-07]
+    procurement:
+      kind: mandatory
+      evidence_required:
+        - Recorded demonstration of renewals and the failure alert
+        - Documentation of supported certificate and key sources
+    status: draft
+    owner: procurement

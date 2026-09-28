@@ -1,0 +1,60 @@
+set: IMPL
+area: ARCH
+requirements:
+  - id: IMPL-ARCH-001
+    title: Planes deployed as separate units
+    layer: process
+    type: process
+    level: system
+    priority: must
+    statement: The platform team shall deploy the control, data, identity and observability planes as separate deployment units with separate scaling configuration.
+    rationale: Plane separation must be designed into the deployment, not assumed from the product architecture.
+    source: SOL-ARCH-001
+    acceptance_criteria:
+      - The platform repository defines each plane in its own deployment artefact with its own scaling configuration.
+    verification: demonstration
+    allocated_to: [C1, C2, C5, C14, ORG]
+    traces:
+      satisfies: [SOL-ARCH-001]
+      use_cases: [UC-05]
+      standards: [NIST SP 800-207]
+    status: draft
+    owner: platform-operations
+  - id: IMPL-ARCH-002
+    title: Hosting decision recorded per data-plane deployment
+    layer: process
+    type: process
+    level: system
+    priority: should
+    statement: The platform architecture team shall record a hosting decision for each data-plane deployment in the platform repository, stating runtime, region and the data-residency and latency requirements it satisfies, before the deployment is created.
+    rationale: Hosting choices made ad hoc drift from data-residency obligations and are hard to audit later.
+    source: SOL-ARCH-002
+    acceptance_criteria:
+      - Every data-plane deployment defined in the platform repository references a hosting decision record.
+      - The pipeline rejects a new data-plane deployment that has no hosting decision record.
+    verification: inspection
+    allocated_to: [C1, C3, C4, ORG]
+    traces:
+      satisfies: [SOL-ARCH-002]
+      use_cases: [UC-01]
+    status: draft
+    owner: platform-architecture
+  - id: IMPL-ARCH-003
+    title: Control-plane outage drill every 6 months
+    layer: process
+    type: process
+    level: system
+    priority: must
+    statement: The platform team shall run a control-plane outage drill in a production-like environment at least every 6 months.
+    rationale: Plane separation degrades silently through shared dependencies unless it is exercised regularly.
+    source: SOL-ARCH-001
+    acceptance_criteria:
+      - The drill report shows the gateway serving existing routes for 60 minutes with the control plane stopped.
+      - Findings from each drill are tracked as issues in the platform repository.
+    verification: demonstration
+    allocated_to: [C1, C2, C5, C14, ORG]
+    traces:
+      satisfies: [SOL-ARCH-001]
+      use_cases: [UC-05]
+    status: draft
+    owner: platform-operations

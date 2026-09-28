@@ -1,0 +1,128 @@
+# Controlled vocabulary for the requirement baseline.
+# This file is the source of truth for every allowed value. The lint reads it, and the
+# JSON Schema enums must match it (lint L13).
+
+sets:                         # requirement sets; the fields below define each set's purpose, use and extent
+  SOL:
+    name: solution requirements
+    purpose: "State what the system of interest (the API management solution and its lifecycle processes) shall be or do, from goals down to system and component level."
+    scope: "Basis for procurement evaluation (PROC), delivery (IMPL) and acceptance; product-neutral, but constrains the solution where the buyer needs it (open standards, interfaces)."
+    extent: "API gateway, control plane, identity and authorisation, policy, developer portal, pipelines, observability and their operation; excludes the backends' own business logic."
+  PROC:
+    name: procurement requirements
+    purpose: "State how an offer, product or supplier is qualified, checked pass/fail and scored against SOL."
+    scope: "Tender documents and offer evaluation; each record states the evidence the supplier provides and how it is assessed."
+    extent: "One or more records per SOL requirement that procurement can assess; not used after contract award."
+  IMPL:
+    name: implementation requirements
+    purpose: "State how the buyer's organisation and delivery realise and operate SOL (processes, pipeline gates, roles)."
+    scope: "Delivery planning, operating model and internal audit; realised by the buyer, not by the supplier."
+    extent: "Process, organisation and assurance requirements for the platform team, API providers and governance functions."
+
+layers:                       # a second way to group requirements, across sets and areas
+  technology:   { meaning: "a property or behaviour of the technical system" }
+  process:      { meaning: "how work is done: pipeline stages, reviews, drills" }
+  organization: { meaning: "who does it: roles, ownership, competence" }
+
+areas:                        # grouping for procurement scoring and delivery work packages
+                              # weight: share of the total procurement score (sum = 1.0, lint L14); tune per project
+  GOAL: { name: Goals (top of the SOL requirement hierarchy),        weight: 0 }
+  ARCH: { name: Architecture & deployment model,                     weight: 0.05 }
+  GW:   { name: Gateway & runtime enforcement,                       weight: 0.1 }
+  SEC:  { name: "Identity, authentication & authorization (OAuth 2.1 / FAPI 2.0, zero trust)", weight: 0.25 }
+  LCM:  { name: API design & lifecycle,                              weight: 0.05 }
+  DEVX: { name: Developer portal & consumer onboarding,              weight: 0.05 }
+  CAC:  { name: Configuration as code & CI/CD,                       weight: 0.2 }
+  POL:  { name: Policy governance & compliance,                      weight: 0.1 }
+  OBS:  { name: "Observability, audit & monitoring",                 weight: 0.05 }
+  OPS:  { name: "Operations, resilience & performance",              weight: 0.05 }
+  DATA: { name: Data protection & privacy,                           weight: 0.05 }
+  ORG:  { name: "Organisation, roles & competence",                  weight: 0 }
+  COM:  { name: "Commercial, support & vendor",                      weight: 0.05 }
+
+types:                        # the record's primary requirement type. A requirement can belong to several
+                              # categories at once (e.g. a regulatory requirement that is also a cybersecurity
+                              # requirement); the field holds the one most useful for filtering.
+  goal:                 { name: goal, meaning: "a high-level objective for the solution, broken down into more detailed requirements" }
+  system:               { name: system requirement, meaning: "what the solution as a whole must do or be" }
+  quality:              { name: quality requirement, meaning: "how well the solution or a process must perform in some respect, e.g. latency" }
+  cybersecurity:        { name: cybersecurity requirement, meaning: "protection of the solution against attack" }
+  information_security: { name: information security requirement, meaning: "protection of the data the solution handles" }
+  process:              { name: process requirement, meaning: "the way work is done to build, deliver or run the solution" }
+  organizational:       { name: organizational requirement, meaning: "roles, responsibilities and team set-up" }
+  assurance:            { name: assurance requirement, meaning: "evidence that the solution or supplier meets its requirements" }
+  regulatory:           { name: regulatory requirement, meaning: "compliance with standards, contracts or internal rules" }
+  legal:                { name: legal requirement, meaning: "compliance with a law or regulation" }
+
+levels:                       # level of detail; level names are this project's choice
+  goal:      { name: goal, meaning: "top of the SOL hierarchy (area GOAL)" }
+  top_level: { name: top-level requirement, meaning: "top of an area's sub-hierarchy below a goal, or of an IMPL hierarchy" }
+  system:    { name: system-level requirement }
+  component: { name: component-level requirement }
+
+priorities:                   # ordinal priority scale, expressing the buyer's priority
+  must:   { meaning: "not negotiable; unmet = offer disqualified / release blocked" }
+  should: { meaning: "expected; unmet must be justified and is scored" }
+  could:  { meaning: "desirable; scored with low weight" }
+
+verification_methods:         # how fulfilment is established (ISO/IEC/IEEE 29148 methods plus evidence review)
+  inspection:    { meaning: "examine documents, configuration or code" }
+  analysis:      { meaning: "reason from models, data or measurements" }
+  demonstration: { meaning: "show the capability working, without detailed measurement" }
+  test:          { meaning: "execute defined cases and compare results with expected values" }
+  evidence:      { meaning: "review supplier documents, certificates or conformance reports" }
+
+procurement_kinds:            # only for PROC
+  qualification: { meaning: "pass/fail on the supplier (e.g. certifications, financial standing)" }
+  mandatory:     { meaning: "pass/fail on the offer; fail = rejected" }
+  evaluated:     { meaning: "scored; contributes to award decision" }
+
+statuses:                     # requirement status
+  draft:    { meaning: "written, not yet reviewed" }
+  reviewed: { meaning: "peer and security review done" }
+  approved: { meaning: "accepted by the owner and procurement or steering" }
+  retired:  { meaning: "no longer applies; kept so the ID is never reused" }
+
+roles:                        # roles used in the documents
+  buyer:       { meaning: "the organisation procuring the solution (acquirer)" }
+  supplier:    { meaning: "the organisation submitting an offer (vendor)" }
+  owner:       { meaning: "the person or team accountable for a requirement" }
+  stakeholder: { meaning: "anyone with an interest in the solution: users, operators, security, suppliers" }
+
+components:                   # system elements that requirements are allocated to (see docs/01)
+  C1: API Gateway / PEP
+  C2: Control plane / API registry
+  C3: Git repositories
+  C4: CI/CD pipeline
+  C5: Authorization Server
+  C6: Identity Provider
+  C7: Policy Decision Point
+  C8: Policy Information Point
+  C9: Developer portal
+  C10: Client & credential registry
+  C11: PKI & certificate lifecycle
+  C12: Secrets & key management
+  C13: Threat protection
+  C14: Observability & audit
+  C15: API providers (backends)
+  C16: API consumers (clients)
+  C17: Analytics / monetisation
+  ORG: Organisation (non-technical realisation)
+
+weasel_words:                 # rejected in `statement`, because they make a requirement ambiguous or unverifiable
+  - adequate
+  - appropriate
+  - as needed
+  - best practice
+  - easy
+  - efficient
+  - etc
+  - fast
+  - flexible
+  - if possible
+  - robust
+  - seamless
+  - state of the art
+  - sufficient
+  - user-friendly
+  - "and/or"

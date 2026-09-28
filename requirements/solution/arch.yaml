@@ -1,0 +1,42 @@
+set: SOL
+area: ARCH
+requirements:
+  - id: SOL-ARCH-001
+    title: Separation of control, data, identity and observability planes
+    layer: technology
+    type: system
+    level: top_level
+    priority: must
+    statement: The solution shall separate the control plane, the data plane (gateway), the identity plane (authorization server) and the observability plane into independently deployable and independently scalable components.
+    rationale: Plane separation limits blast radius, allows the data plane to keep serving traffic during control-plane outages and lets the authorization server be replaced or externally sourced.
+    source: Zero-trust reference architecture (docs/01), NIST SP 800-207
+    acceptance_criteria:
+      - Gateway continues to serve existing routes for at least 60 minutes with the control plane unavailable.
+      - Each plane can be scaled without redeploying another plane.
+      - The authorization server can be an external product integrated via OAuth 2.1 / OIDC metadata (RFC 8414) without gateway code changes.
+    verification: demonstration
+    allocated_to: [C1, C2, C5, C14]
+    traces:
+      parents: [SOL-GOAL-005]
+      use_cases: [UC-05]
+      standards: [NIST SP 800-207, RFC 8414]
+    status: draft
+    owner: platform-architecture
+  - id: SOL-ARCH-002
+    title: Deployment model independence
+    layer: technology
+    type: system
+    level: system
+    priority: should
+    statement: The solution shall support deployment of the data plane in the buyer's chosen runtime (public cloud, private cloud or on-premises) while the control plane may be self-hosted or vendor-hosted.
+    rationale: Data residency and latency requirements differ per API; the reference is neutral on hosting.
+    source: Stakeholder need — hosting flexibility
+    acceptance_criteria:
+      - Vendor documentation lists supported runtimes for gateway and control plane separately.
+      - A gateway instance deployed in a buyer-controlled Kubernetes cluster registers with the control plane over an outbound, mutually authenticated connection.
+    verification: evidence
+    allocated_to: [C1, C2]
+    traces:
+      parents: [SOL-ARCH-001]
+    status: draft
+    owner: platform-architecture

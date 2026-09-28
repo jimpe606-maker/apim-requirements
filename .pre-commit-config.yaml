@@ -1,0 +1,10 @@
+# Run the requirements lint before every commit: pip install pre-commit && pre-commit install
+repos:
+  - repo: local
+    hooks:
+      - id: requirements-lint
+        name: requirements lint
+        entry: python tools/lint.py
+        language: system
+        pass_filenames: false
+        files: ^(requirements|schema|docs)/

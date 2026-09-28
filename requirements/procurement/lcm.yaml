@@ -1,0 +1,97 @@
+set: PROC
+area: LCM
+requirements:
+  - id: PROC-LCM-001
+    title: Contract-first fidelity
+    layer: technology
+    type: assurance
+    level: system
+    priority: should
+    statement: The offer shall be scored on the proportion of runtime behaviour (routing, validation, security schemes, documentation) that is derived from the OpenAPI document without supplementary configuration, using the buyer's sample contracts.
+    rationale: Products that need parallel configuration next to the contract reintroduce drift.
+    source: SOL-LCM-001
+    acceptance_criteria:
+      - For each sample contract, the vendor documents which behaviours were derived automatically and which required extra configuration.
+    verification: demonstration
+    allocated_to: [C2, C1]
+    traces:
+      satisfies: [SOL-LCM-001, SOL-LCM-002, SOL-LCM-004]
+    procurement:
+      kind: evaluated
+      evidence_required:
+        - Derivation matrix per sample contract
+      scoring:
+        max_points: 5
+        weight: 0.5
+        scale:
+          - points: 5
+            condition: Routing, validation, security and docs all derived; breaking-change diff available.
+          - points: 3
+            condition: Security schemes require separate configuration.
+          - points: 0
+            condition: Contract is documentation only.
+    status: draft
+    owner: procurement
+  - id: PROC-LCM-002
+    title: Automated deprecation and sunset signalling
+    layer: technology
+    type: assurance
+    level: component
+    priority: should
+    statement: The offer shall be scored on whether marking an API version deprecated in configuration automatically adds RFC 9745 Deprecation and RFC 8594 Sunset headers at the gateway and shows the sunset date and migration target in the portal.
+    rationale: Deprecation that needs manual steps in several places is applied inconsistently and surprises consumers.
+    source: SOL-LCM-003
+    acceptance_criteria:
+      - After a single declarative change marking a version deprecated, responses carry Deprecation and Sunset headers with the configured dates.
+      - The portal shows the sunset date and migration target within 5 minutes of deployment.
+    verification: demonstration
+    allocated_to: [C1, C9, C2]
+    traces:
+      satisfies: [SOL-LCM-003, SOL-LCM-005]
+      use_cases: [UC-07]
+      standards: [RFC 8594, RFC 9745]
+    procurement:
+      kind: evaluated
+      evidence_required:
+        - Recorded demonstration of the deprecation change and resulting headers and portal entry
+        - Configuration artefact used for the change
+      scoring:
+        max_points: 5
+        weight: 0.5
+        scale:
+          - points: 5
+            condition: One declarative change drives both gateway headers and portal display.
+          - points: 3
+            condition: Headers and portal display both work but need separate configuration changes.
+          - points: 1
+            condition: Headers require a custom policy or script.
+          - points: 0
+            condition: No support for Deprecation or Sunset headers.
+    status: draft
+    owner: procurement
+  - id: PROC-LCM-003
+    title: Minimum contract-first capability
+    layer: technology
+    type: assurance
+    level: system
+    priority: must
+    statement: The offer shall demonstrate that importing each of the buyer's sample OpenAPI 3.x contracts creates working routes and request validation without manual editing of the generated configuration.
+    rationale: Contract-first delivery is a must-have, so a product that treats the contract as documentation only must be rejected; PROC-LCM-001 then scores how much further derivation goes.
+    source: SOL-LCM-001
+    acceptance_criteria:
+      - Each sample contract yields routes that forward valid requests to the test backend.
+      - Each sample contract yields request validation that rejects a schema-violating request with HTTP 400.
+    verification: demonstration
+    allocated_to: [C2, C1]
+    traces:
+      satisfies: [SOL-LCM-001]
+      related: [PROC-LCM-001]
+      use_cases: [UC-02]
+      standards: [OpenAPI 3.x]
+    procurement:
+      kind: mandatory
+      evidence_required:
+        - Recorded demonstration per sample contract
+        - Generated configuration artefacts
+    status: draft
+    owner: procurement
