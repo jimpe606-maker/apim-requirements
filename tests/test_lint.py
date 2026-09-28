@@ -80,7 +80,7 @@ def test_weasel_words_ignore_substrings(repo, phrase):
 
 
 def test_area_scoring_weights_must_sum_to_one(repo):
-    edit(repo / "requirements/procurement/pol.yaml", "weight: 1.0", "weight: 0.6")
+    edit(repo / "requirements/procurement/pol.yaml", "weight: 0.7", "weight: 0.6")
     assert any(" L14 " in m and "POL scoring weights" in m for m in lint(repo).errors)
 
 
@@ -116,7 +116,7 @@ def test_export_writes_all_formats(tmp_path):
 
 
 def test_export_refuses_inconsistent_baseline(repo, tmp_path):
-    edit(repo / "requirements/procurement/pol.yaml", "weight: 1.0", "weight: 0.6")
+    edit(repo / "requirements/procurement/pol.yaml", "weight: 0.7", "weight: 0.6")
     assert export.main(["--root", str(repo), "--out", str(tmp_path / "out")]) == 1
 
 
@@ -135,3 +135,10 @@ def test_goal_without_children_warns(repo):
 
 def test_goals_are_exempt_from_coverage_warnings():
     assert not any("SOL-GOAL-" in m and (" W01 " in m or " W03 " in m or " W04 " in m) for m in lint(ROOT).warnings)
+
+
+def test_invalid_yaml_reports_instead_of_crashing(repo):
+    edit(repo / "requirements/solution/com.yaml", "statement: The solution shall",
+         "statement: The solution shall: break yaml and")
+    res = lint(repo)
+    assert any("com.yaml:- L01 invalid YAML at line" in m for m in res.errors)

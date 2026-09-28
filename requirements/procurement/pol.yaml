@@ -17,6 +17,7 @@ requirements:
     allocated_to: [C4, C1, C7]
     traces:
       satisfies: [SOL-POL-001, SOL-POL-002]
+      related: [PROC-POL-004]
     procurement:
       kind: evaluated
       evidence_required:
@@ -24,12 +25,12 @@ requirements:
         - Language documentation
       scoring:
         max_points: 5
-        weight: 1.0
+        weight: 0.7
         scale:
           - points: 5
-            condition: Open language (e.g. Rego/Cedar or vendor DSL with public spec), offline lint and unit tests, plus impact analysis.
+            condition: Open language (e.g. Rego/Cedar or vendor DSL with public spec), offline lint and unit tests.
           - points: 3
-            condition: Offline lint and unit tests without impact analysis.
+            condition: Offline lint and unit tests, but the language specification is not public.
           - points: 1
             condition: Lint only, tests require a running instance.
           - points: 0
@@ -83,5 +84,40 @@ requirements:
       evidence_required:
         - Test execution log for the four non-compliant deployments
         - Audit record of the denied guardrail change
+    status: draft
+    owner: procurement
+  - id: PROC-POL-004
+    title: Policy change impact analysis
+    layer: technology
+    type: assurance
+    level: system
+    priority: should
+    statement: The offer shall be scored on whether a policy change can be analysed before deployment to list the APIs, clients and subscriptions it affects.
+    rationale: Knowing who is affected before a policy change lets the right API owners review it and prevents unintended outages.
+    source: SOL-POL-003
+    acceptance_criteria:
+      - Using the buyer's test set of policies and APIs, the impact report is compared with the known set of affected objects.
+      - The analysis runs in the buyer's CI before deployment.
+    verification: test
+    allocated_to: [C2, C4]
+    traces:
+      satisfies: [SOL-POL-003]
+      related: [PROC-POL-001]
+      use_cases: [UC-06]
+    procurement:
+      kind: evaluated
+      evidence_required:
+        - Impact reports produced for the buyer's test set
+        - CI run log
+      scoring:
+        max_points: 5
+        weight: 0.3
+        scale:
+          - points: 5
+            condition: The report lists affected APIs, clients and subscriptions exactly, and runs offline in CI.
+          - points: 3
+            condition: The report lists affected APIs exactly, but not clients or subscriptions.
+          - points: 0
+            condition: No impact analysis, or the report misses objects in the test set.
     status: draft
     owner: procurement

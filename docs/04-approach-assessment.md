@@ -2,7 +2,7 @@
 
 A critical review of *requirements as code* for this baseline: what works, what does not,
 which alternatives were considered, and what should change. Written for release
-0.1.0-alpha.1 (128 requirements: SOL 53 including 7 goals, PROC 33, IMPL 42). Numbers below are from that
+0.1.0-alpha.1 and updated since (131 requirements: SOL 53 including 7 goals, PROC 35, IMPL 43). Numbers below are from that
 release; re-run `python tools/lint.py --strict` to reproduce them.
 
 ## 1. Verdict
@@ -34,7 +34,7 @@ release (§4); the rest is the roadmap (§5).
 | Coverage check was one-sided. | W01 passed when a SOL record had an IMPL record but was never evaluated in procurement. | W01 (no PROC) and W03 (no IMPL) are now separate. |
 | Four `must` SOL records could only lose points, never disqualify an offer. | SOL-GW-001, SOL-LCM-001, SOL-POL-001 and SOL-POL-002 were covered only by `evaluated` PROC records. | Mandatory minimum-bar records PROC-GW-003, PROC-LCM-003, PROC-POL-002 and PROC-POL-003; new check W04. |
 | Scoring weights did not add up. | Weights in CAC summed to 0.5, POL to 0.6, SEC to 0.7; area weights existed only as a prose table. | Area weights moved to `vocab.yaml`; L14 enforces sums of 1.0; SEC, CAC and POL rebalanced proportionally. |
-| 10 % of the total score could not be earned. | DEVX and OPS carry weight but had no scored PROC record. | Reported as W06; DEVX closed with PROC-DEVX-002, OPS still open (§5). |
+| 10 % of the total score could not be earned. | DEVX and OPS carry weight but had no scored PROC record. | Reported as W06; closed with PROC-DEVX-002 and PROC-OPS-003. |
 | No output a procurement officer can use. | Only YAML existed. | `tools/export.py` writes CSV, catalogue, traceability matrix and scoring sheet. |
 | The lint crashed on some schema-invalid records and missed vague words followed by punctuation. | `KeyError: 'priority'`; `etc.` passed. | Defensive checks and whole-word matching, with regression tests in `tests/`. |
 | The model had gaps against established requirements-engineering concepts. | No goal records although docs/03 claimed them, so the hierarchy had no top and traceability to stakeholder needs was only the one-way `source` text; the parent field was called `derives_from`, although a *derived requirement* usually means one created to fill a gap; "non-functional" was used although it classifies little; sets had no definition of purpose and extent. | Seven goal records (area GOAL) with every SOL requirement linked up to one (W07); field renamed to `parents`; set definitions (purpose, scope, extent) in the vocabulary; docs/03 maps every requirement and set property to a lint check or a review step. |
@@ -56,10 +56,10 @@ release (§4); the rest is the roadmap (§5).
    proportionality principle.
    The baseline does not yet say *when* each check happens (tender, shortlist, or contract
    acceptance).
-4. **`source` duplicates `traces.satisfies`** on 36 of 75 PROC/IMPL records, so the two can
+4. **`source` duplicates `traces.satisfies`** on 39 of 78 PROC/IMPL records, so the two can
    silently diverge.
 5. **The priority scale is top-heavy.** 32 of 46 SOL requirements (goals excluded) and 86 of
-   128 records overall are `must`. Prioritisation is of limited use when most requirements get
+   131 records overall are `must`. Prioritisation is of limited use when most requirements get
    the highest level, and a scale only works if everyone using it agrees what each level means. Before a tender, the buyer should re-prioritise against its own
    stakeholder needs; a three-level scale where most items are `must` gives evaluators little
    to work with.
@@ -102,11 +102,9 @@ Ordered by value to a buyer using the baseline.
 3. **Introduce named parameters** (e.g. `revocation_latency: 60 s`) in one file, referenced
    from statements and resolved by the lint and export, so a buyer tunes the baseline in one
    place.
-4. **Close remaining coverage gaps**: a scored record for OPS (W06), PROC for SOL-POL-003
-   (W01), IMPL for SOL-COM-001 (W03).
-5. **Re-prioritise** SOL requirements against the buyer's stakeholder needs before use (§3.2
+4. **Re-prioritise** SOL requirements against the buyer's stakeholder needs before use (§3.2
    item 5), and consider a four-level scale.
-6. **Controlled lists for owners and standards** in `vocab.yaml`, checked by the lint.
-7. **Deprecate `source` on PROC/IMPL** in favour of `traces.satisfies`.
-8. **ReqIF and HTML exports**, or a StrictDoc export, once the content is stable.
-9. **ID allocation guidance** (or one file per record) before opening to many contributors.
+5. **Controlled lists for owners and standards** in `vocab.yaml`, checked by the lint.
+6. **Deprecate `source` on PROC/IMPL** in favour of `traces.satisfies`.
+7. **ReqIF and HTML exports**, or a StrictDoc export, once the content is stable.
+8. **ID allocation guidance** (or one file per record) before opening to many contributors.

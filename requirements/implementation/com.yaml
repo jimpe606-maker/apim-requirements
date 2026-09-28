@@ -1,0 +1,23 @@
+set: IMPL
+area: COM
+requirements:
+  - id: IMPL-COM-001
+    title: Yearly exit drill
+    layer: process
+    type: process
+    level: system
+    priority: should
+    statement: The platform team shall export all API contracts, policies, client registrations and audit records at least once a year and verify that the export is complete and valid.
+    rationale: An exit plan that has never been exercised gives no assurance that the buyer can change supplier.
+    source: SOL-COM-001
+    acceptance_criteria:
+      - The export contains every API, policy, client and audit record listed in the platform inventory at the time of export.
+      - Exported contracts validate as OpenAPI, client metadata validates against RFC 7591, and audit records parse as JSON.
+      - Findings from each drill are tracked as issues in the platform repository.
+    verification: demonstration
+    allocated_to: [C2, C10, C14, ORG]
+    traces:
+      satisfies: [SOL-COM-001]
+      standards: [OpenAPI 3.x, RFC 7591]
+    status: draft
+    owner: platform-architecture

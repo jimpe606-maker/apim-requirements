@@ -41,11 +41,49 @@ requirements:
     allocated_to: [C11, C12, C5]
     traces:
       satisfies: [SOL-OPS-002, SOL-OPS-003]
+      related: [PROC-OPS-003]
       use_cases: [UC-07]
     procurement:
       kind: mandatory
       evidence_required:
         - Recorded demonstration of renewals and the failure alert
         - Documentation of supported certificate and key sources
+    status: draft
+    owner: procurement
+  - id: PROC-OPS-003
+    title: Breadth of automated certificate and key sources
+    layer: technology
+    type: assurance
+    level: system
+    priority: should
+    statement: The offer shall be scored on how many of the buyer's certificate and key sources the product automates natively (ACME certificate authorities, SPIFFE workload identity, external KMS or HSM for signing keys, and the buyer's internal certificate authority).
+    rationale: Automation only helps if it works with the certificate and key infrastructure the buyer already runs; each unsupported source needs custom scripts.
+    source: SOL-OPS-002
+    acceptance_criteria:
+      - Each claimed source is documented as supported for the offered version.
+      - The evaluator selects one claimed source and the vendor demonstrates automatic renewal with it.
+    verification: evidence
+    allocated_to: [C11, C12, C5]
+    traces:
+      satisfies: [SOL-OPS-002]
+      related: [PROC-OPS-002]
+      use_cases: [UC-07]
+    procurement:
+      kind: evaluated
+      evidence_required:
+        - Documentation of supported certificate and key sources for the offered version
+        - Recorded demonstration of renewal with the source selected by the evaluator
+      scoring:
+        max_points: 5
+        weight: 1.0
+        scale:
+          - points: 5
+            condition: All four sources automated natively.
+          - points: 3
+            condition: Three of the four sources automated natively.
+          - points: 1
+            condition: One or two sources automated natively.
+          - points: 0
+            condition: No native automation; renewal needs buyer-written scripts.
     status: draft
     owner: procurement
