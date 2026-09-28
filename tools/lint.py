@@ -5,7 +5,7 @@
 Usage: python tools/lint.py [--strict] [--root PATH]
 
 Checks (all fail the build):
-  L01 file validates against schema/requirement.schema.json (enums taken from vocab.yaml)
+  L01 file is valid YAML and validates against schema/requirement.schema.json (enums taken from vocab.yaml)
   L02 file-level set/area match every record id prefix
   L03 ids unique across the whole repository
   L04 every trace target exists (parents, satisfies, related)
@@ -85,7 +85,13 @@ def load_records(root, schema, res):
     validator = Draft202012Validator(schema)
     for f in sorted((root / "requirements").rglob("*.yaml")):
         rel = f.relative_to(root)
-        data = yaml.safe_load(f.read_text())
+        try:
+            data = yaml.safe_load(f.read_text())
+        except yaml.YAMLError as e:
+            mark = getattr(e, "problem_mark", None)
+            where = f" at line {mark.line + 1}, column {mark.column + 1}" if mark else ""
+            res.err(rel, None, "L01", f"invalid YAML{where}: {getattr(e, 'problem', None) or e}")
+            continue
         for e in sorted(validator.iter_errors(data), key=lambda e: list(e.path)):
             res.err(rel, None, "L01", f"schema: {'/'.join(map(str, e.path))}: {e.message}")
         if not isinstance(data, dict): continue

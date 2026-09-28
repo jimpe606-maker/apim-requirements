@@ -15,7 +15,7 @@ Use it as a starting point for your own tender, architecture review or platform 
 fork it, adjust priorities and weights to your context, run the checks, and export the
 result to the formats your procurement process needs.
 
-> **Alpha.** All 128 requirements are `draft`. They have been checked by tooling, not yet by
+> **Alpha.** All 131 requirements are `draft`. They have been checked by tooling, not yet by
 > an independent peer and security review. Expect wording, IDs and weights to change before
 > 1.0. See [docs/04](docs/04-approach-assessment.md) for known weaknesses and the roadmap.
 
@@ -49,8 +49,8 @@ different subject and verb:
 | Set | Question it answers | Subject and verb | Count |
 |---|---|---|---|
 | **SOL** Solution | *What* must the system be or do? A hierarchy from 7 goals down to component level; product-neutral. | "The solution shall provide…" | 53 |
-| **PROC** Procurement | *How* is an offer qualified, checked and scored against SOL? | "The offer shall demonstrate / be scored on…" | 33 |
-| **IMPL** Implementation | *How* does the buyer's organisation realise and operate it? | "The pipeline / team shall…" | 42 |
+| **PROC** Procurement | *How* is an offer qualified, checked and scored against SOL? | "The offer shall demonstrate / be scored on…" | 35 |
+| **IMPL** Implementation | *How* does the buyer's organisation realise and operate it? | "The pipeline / team shall…" | 43 |
 
 Every PROC and IMPL record traces to at least one SOL record, and every `must` SOL record has
 a pass/fail PROC record that can disqualify an offer. Example chain:
@@ -113,12 +113,9 @@ proportionality of requiring live demonstrations; see
 
 ## Status
 
-`python tools/lint.py` → 128 requirements, 0 errors, 3 warnings. The warnings are known gaps,
-each a good first contribution:
-
-* No scored PROC record for the OPS area, so its 5 % weight cannot be earned (W06).
-* No PROC record for SOL-POL-003 (W01).
-* No IMPL record for SOL-COM-001 (W03).
+`python tools/lint.py` → 131 requirements, 0 errors, 0 warnings. Every SOL requirement traces
+up to a goal and is covered by at least one PROC and one IMPL record, and every weighted area
+can earn its full score.
 
 Every statement has exactly one *shall* (`--strict` reports no W05, and CI enforces it);
 statements that bundle a list under one *shall* still need human review. See the [roadmap](docs/04-approach-assessment.md#5-roadmap-proposed) and

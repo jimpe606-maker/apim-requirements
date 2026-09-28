@@ -5,6 +5,23 @@ All notable changes to this baseline are documented here. The format follows
 [Semantic Versioning](https://semver.org/) for requirement content (see
 [CONTRIBUTING](CONTRIBUTING.md#releases)).
 
+## [Unreleased]
+
+### Added
+
+- PROC-POL-004 scores policy change impact analysis (SOL-POL-003) as its own record;
+  PROC-POL-001 no longer includes impact analysis in its top score, and the POL weights are
+  now 0.7 (PROC-POL-001) and 0.3 (PROC-POL-004).
+- PROC-OPS-003 scores the breadth of automated certificate and key sources (SOL-OPS-002), so the
+  OPS area weight can be earned.
+- IMPL-COM-001: a yearly exit drill that proves a complete, valid export (SOL-COM-001).
+
+### Fixed
+
+- The lint reports invalid YAML as an L01 error instead of crashing.
+
+The lint now reports 0 errors and 0 warnings (131 requirements).
+
 ## [0.1.0-alpha.1] - 2026-09-28
 
 First public alpha. Requirement content is `draft` and may change in any release.
