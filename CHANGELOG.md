@@ -19,6 +19,9 @@ All notable changes to this baseline are documented here. The format follows
 ### Fixed
 
 - The lint reports invalid YAML as an L01 error instead of crashing.
+- Six of the seven sequence diagrams in docs/02 did not render on GitHub: a semicolon inside a
+  message ends a Mermaid statement. Semicolons replaced with commas, one message with `<token>`
+  placeholders rephrased, and `tests/test_docs.py` added so this cannot recur.
 
 The lint now reports 0 errors and 0 warnings (131 requirements).
 
