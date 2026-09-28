@@ -1,10 +1,9 @@
+# Only GitHub Actions are kept current automatically. Python dependencies are
+# deliberately unpinned minimum versions (requirements.txt) so the tools install
+# alongside other packages; raise a minimum only when the code needs a newer feature.
 version: 2
 updates:
   - package-ecosystem: github-actions
-    directory: /
-    schedule:
-      interval: monthly
-  - package-ecosystem: pip
     directory: /
     schedule:
       interval: monthly
